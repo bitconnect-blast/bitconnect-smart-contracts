@@ -10,16 +10,18 @@ async function main() {
   const [deployer] = await hre.ethers.getSigners();
 
   const Vesting = await hre.ethers.getContractFactory("BitconnectVesting");
-  const vesting = await Vesting.connect(deployer).deploy(feeManagerAddress);
+
+  // constructor(address _token, uint256 _vestedTokenTotalAmount, uint256 _vestingStartTime, address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo)
+  const vesting = await Vesting.connect(deployer).deploy(
+    process.env.BITCONNECT_TOKEN_ADDRESS,
+    process.env.TOTAL_AMOUNT_BIT_TO_VEST,
+    process.env.VESTING_START_TIME,
+    process.env.BLAST_FEE_MANAGER,
+    process.env.MIN_CLAIM_RATE_BIPS,
+    process.env.BLAST_GAS_FEE_TO
+  );
 
   await vesting.deployed();
-
-  console.log(
-
-    `========================
-    \n BitconnectVesting Deployed to: ${vesting.address}
-    \n========================`
-  );
 
   let VESTING_VERIFIED = true; //leave as true if not verifying
 
@@ -51,12 +53,7 @@ async function main() {
   }
 
   // Return an object with vesting contract address and fee manager address
-  return {
-    vesting: {
-      address: vesting.address,
-      feeManagerAddress: feeManagerAddress
-    }
-  };
+  return vesting;
 }
 
 // Export the main function to be callable from another script

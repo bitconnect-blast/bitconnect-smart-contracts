@@ -4,7 +4,7 @@ async function main() {
 
   //get deployer address
   const [deployer] = await hre.ethers.getSigners();
-  const factoryAddress = "0x02E8a1343701d236F74D145a69bAF0FE40E7e207"; // our uni v2 fork factory address
+  const factoryAddress = process.env.BITDEX_FACTORY_ADDRESS;
 
   /**
    * Later, add address and amount for bitconnect token which will be used as referral token

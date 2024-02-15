@@ -68,7 +68,7 @@ async function main(verify) {
     }
   }
 
-  return router.address;
+  return router;
 }
 
 module.exports = {

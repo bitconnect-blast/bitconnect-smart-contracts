@@ -34,14 +34,12 @@ const deployBitDexRouter = require("./bitdex/deploy_router").main;
 const deployMockERC20 = require("./utils/deploy_mock_erc20").main;
 const deployBitconnect = require("./bitconnect/deploy_bitconnect_token").main;
 
-const USING_MODIFIED_UNIV2 = true;
-const TEST_ADD_LIQUIDITY = true;
-const TESTING_MOCK_TOKEN_ADDRESS ="0x18963E91d55E3178c84D65B02CDed4CFA2dC1a7f";//"0xbD5cBa686748EE152b92A3D6fE74C3BD97af3378"; //or 0x18963E91d55E3178c84D65B02CDed4CFA2dC1a7f seems to have worked.
+const BITCONNECT_TOKEN_ADDRESS ="0x18963E91d55E3178c84D65B02CDed4CFA2dC1a7f";
 const TEST_FEE_MANAGER_ADDRESS = "0xca0Df8fe3235263a18CbFBfF9929E36022Ec8695";
 
-const DEPLOY_TEST_TOKEN = true;
-const DEPLOY_FEE_MANAGER = true;
-const DEPLOY_BITDEX = true;
+const DEPLOY_TEST_TOKEN = false;
+const DEPLOY_FEE_MANAGER = false;
+const DEPLOY_BITDEX = false;
 const DEPLOY_MULTICALL = false;
 const DEPLOY_BITCONNECT = false;
 const DEPLOY_BITVEST = false;
@@ -50,6 +48,7 @@ const DEPLOY_BITLOCK = false;
 const DEPLOY_BITSEND = false;
 const DEPLOY_BITMINER = false;
 
+//only select true if the DEPLOY_* option above is also true
 const VERIFY_TEST_TOKEN = false;
 const VERIFY_FEE_MANAGER = false;
 const VERIFY_BITDEX = false;
@@ -64,7 +63,7 @@ const VERIFY_BITMINER = false;
 const LOGGING = true;
 
 //test-tester on test-wallets.txt
-const TEMP_GAS_FEE_TO = "0x7128966d2a9D4E0cEc363aDE4eEb822a4b33F49E";
+// const TEMP_GAS_FEE_TO = "0x7128966d2a9D4E0cEc363aDE4eEb822a4b33F49E";
 
 const mintToForTestToken = [
     "0x06527674dFd9d706469fFf1E5aEe8b24884E0C77",
@@ -80,10 +79,6 @@ const mintAmountsForTestToken = [
 async function main() {
     //REVIEW DEPLOY INFO
     console.log("Review Deployment Configuration:");
-    console.log(`USING_MODIFIED_UNIV2: ${USING_MODIFIED_UNIV2}`);
-    console.log(`TEST_ADD_LIQUIDITY: ${TEST_ADD_LIQUIDITY}`);
-    console.log(`TESTING_MOCK_TOKEN_ADDRESS: ${TESTING_MOCK_TOKEN_ADDRESS}`);
-    console.log(`TEST_FEE_MANAGER_ADDRESS: ${TEST_FEE_MANAGER_ADDRESS}`);
     console.log(`DEPLOY_TEST_TOKEN: ${DEPLOY_TEST_TOKEN}`);
     console.log(`DEPLOY_FEE_MANAGER: ${DEPLOY_FEE_MANAGER}`);
     console.log(`DEPLOY_BITDEX: ${DEPLOY_BITDEX}`);
@@ -105,7 +100,6 @@ async function main() {
     console.log(`VERIFY_BITSEND: ${VERIFY_BITSEND}`);
     console.log(`VERIFY_BITMINER: ${VERIFY_BITMINER}`);
     console.log(`LOGGING: ${LOGGING}`);
-    console.log(`TEMP_GAS_FEE_TO: ${TEMP_GAS_FEE_TO}`);
 
     const readline = require("readline").createInterface({
         input: process.stdin,
@@ -179,7 +173,7 @@ async function main() {
     if(DEPLOY_BITDEX){
         try{
             const deployFactory = await deployBitDexFactory(VERIFY_BITDEX);
-            process.env.BITDEX_FACTORY_ADDRESS = deployFactory.factoryAddress;
+            process.env.BITDEX_FACTORY_ADDRESS = deployFactory.factoryInstance.address;
             process.env.BITDEX_INIT_CODE_HASH = deployFactory.initCodeHash;
 
             //replace the init code hash in BitDexLibrary.sol
@@ -189,11 +183,11 @@ async function main() {
             const routerAddress = await deployBitDexRouter(VERIFY_BITDEX);
             process.env.BITDEX_ROUTER_ADDRESS = routerAddress;
 
-            // const multicallAddress = await deployMulticall(VERIFY_MULTICALL);
-            // process.env.MULTICALL_ADDRESS = multicallAddress;
+            const multicallAddress = await deployMulticall(VERIFY_MULTICALL);
+            process.env.MULTICALL_ADDRESS = multicallAddress;
 
             if(LOGGING){            
-                console.log('Factory Deployed to:', deployFactory.factoryAddress);
+                console.log('Factory Deployed to:', deployFactory.factoryInstance.address);
                 console.log('INIT_CODE_HASH:', deployFactory.initCodeHash);
                 console.log('Router Deployed to:', routerAddress);
             }
@@ -210,7 +204,7 @@ async function main() {
             }
             try {
                 const mockERC20Address = await deployMockERC20(mintToForTestToken, mintAmountsForTestToken, VERIFY_TEST_TOKEN);
-                process.env.MOCK_TOKEN_ADDRESS = mockERC20Address;
+                process.env.BITCONNECT_TOKEN_ADDRESS = mockERC20Address;
                 if(LOGGING){
                     console.log('Mock ERC20 Deployed to:', mockERC20Address);
                 }
@@ -220,7 +214,7 @@ async function main() {
                 process.exit(1);
             }
         } else {
-            process.env.MOCK_TOKEN_ADDRESS = TESTING_MOCK_TOKEN_ADDRESS;
+            process.env.BITCONNECT_TOKEN_ADDRESS = BITCONNECT_TOKEN_ADDRESS;
         }
     }
 
@@ -246,7 +240,7 @@ async function main() {
         try{} catch (error) {}
     }    
 
-    if(DEPLOY_BITDEX && USING_MODIFIED_UNIV2){
+    if(DEPLOY_BITDEX){
         try{
             //set gasFeeTo
             const Factory = await hre.ethers.getContractFactory("BitDexFactory");
@@ -268,62 +262,6 @@ async function main() {
         }
     }
 
-    if(TEST_ADD_LIQUIDITY) {
-        try {
-            if(LOGGING){
-                console.log("TEST_ADD_LIQUIDITY ==>")
-                console.log("Router: ", process.env.BITDEX_ROUTER_ADDRESS);
-                console.log("Factory: ", process.env.BITDEX_FACTORY_ADDRESS);
-                console.log("Mock Token: ", process.env.MOCK_TOKEN_ADDRESS);
-            }
-
-            const Factory = await hre.ethers.getContractFactory("BitDexFactory");
-            const Router = await hre.ethers.getContractFactory("BitDexRouter");
-            // const Factory = await hre.ethers.getContractFactory("UniswapV2Factory");
-            // const Router = await hre.ethers.getContractFactory("UniswapV2Router02");
-            const Token = await hre.ethers.getContractFactory("MockERC20");
-
-            const factory = Factory.attach(process.env.BITDEX_FACTORY_ADDRESS);
-            const router = Router.attach(process.env.BITDEX_ROUTER_ADDRESS);
-            const token = Token.attach(process.env.MOCK_TOKEN_ADDRESS);
-
-            //approve token to router
-            const approveTxn = await token.connect(deployer).approve(router.address, hre.ethers.utils.parseEther("10000000"));
-            await approveTxn.wait();
-
-            if(LOGGING) console.log(`Token at ${token.address} approved for Router`);
-
-            //wait 5 seconds for any potential lag
-            console.log("Waiting 5 seconds for potential lag to dissipate...")
-            await new Promise(r => setTimeout(r, 5000));
-
-            const addLiquidityTxn = await router.connect(deployer).addLiquidityETH(
-                process.env.MOCK_TOKEN_ADDRESS,
-                hre.ethers.utils.parseEther("100"),
-                hre.ethers.utils.parseEther("90"),
-                hre.ethers.utils.parseEther("0.000001"),
-                deployer.address,
-                Math.floor(Date.now() / 1000) + 60 * 20, //20 minutes
-                { value: hre.ethers.utils.parseEther("0.000001") }
-            );
-            await addLiquidityTxn.wait();
-            const wethAddress = await router.WETH();
-            
-            if(LOGGING) console.log("WETH: ", wethAddress);
-
-            const pairAddress = await factory.getPair(process.env.MOCK_TOKEN_ADDRESS, wethAddress);
-
-            if(LOGGING) console.log("Pair: ", pairAddress);
-
-            console.log(`Liquidity was added to pair ${pairAddress}...`);
-        } catch (error) {
-                console.log(`Test add liquidity error: ${error}`);
-                console.log(`Error stack: ${error.stack}`);
-                process.exit(1);
-        }
-    }
-
-    
     if(hre.network.name != "hardhat") writeEnvToJson(deployer);
 
 }
@@ -343,13 +281,12 @@ function writeEnvToJson(deployer) {
         "BITDEX_INIT_CODE_HASH",
         "BITDEX_ROUTER_ADDRESS",
         "MULTICALL_ADDRESS",
-        "BITCONNECT_ADDRESS",
         "BITVEST_ADDRESS",
         "BITVAULT_ADDRESS",
         "BITLOCK_ADDRESS",
         "BITSEND_ADDRESS",
         "BITMINER_ADDRESS",
-        "MOCK_TOKEN_ADDRESS",
+        "BITCONNECT_TOKEN_ADDRESS",
         "NOTES"
     ];
     //write each of these keys to a .json file if they aren't blank

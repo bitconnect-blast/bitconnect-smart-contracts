@@ -123,6 +123,7 @@ module.exports = {
     },
     hardhat : {
       forking: {
+        enabled: true,
         url: 'https://sepolia.blast.io',
         blockNumber: 1380465,      
         accounts: [process.env.PRIVATE_KEY_BLAST_SEPOLIA_PRODUCTION]
@@ -131,25 +132,6 @@ module.exports = {
 
     }
   },
-  // etherscan: {
-  //     apiKey: etherscan_api_key,
-  // },
-  // etherscan: {
-  //   apiKey: {
-  //     snowtrace: "snowtrace",
-  //   },
-  //   customChains: [
-  //     {
-  //       network: "snowtrace",
-  //       chainId: 43114,
-  //       urls: {
-  //         apiURL:
-  //           "https://api.routescan.io/v2/network/mainnet/evm/43114/etherscan",
-  //         browserURL: "https://avalanche.routescan.io",
-  //       },
-  //     },
-  //   ],
-  // },
   etherscan: {
     apiKey: {
       blast_sepolia: "blast_sepolia", // apiKey is not required, just set a placeholder

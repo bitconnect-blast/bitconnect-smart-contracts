@@ -17,6 +17,7 @@ async function main(verify) {
   const LP_ETH_AMOUNT = hre.ethers.utils.parseEther(process.env.BIT_LP_ETH_AMOUNT); //CHECK!
   const NAME = process.env.TOKEN_NAME; //CHECK!
   const SYMBOL = process.env.TOKEN_SYMBOL; //CHECK!
+  const MIN_CLAIM_RATE_BIPS = process.env.MIN_CLAIM_RATE_BIPS; //CHECK!
   const AUTO_ADJUST_LIMITS_AND_TAX = process.env.AUTO_ADJUST_LIMITS_AND_TAX; //CHECK!
 
   //================================================================================
@@ -42,7 +43,7 @@ async function main(verify) {
     feeManager,
     bitdexRouteraddress,
     feeManager,
-    7500,
+    MIN_CLAIM_RATE_BIPS,
     process.env.BITDEX_FEE_TO
   );
 
@@ -91,7 +92,11 @@ async function main(verify) {
           constructorArguments: [
             NAME, 
             SYMBOL, 
-            treasuryAddress, 
+            feeManager,
+            bitdexRouteraddress,
+            feeManager,
+            MIN_CLAIM_RATE_BIPS,
+            process.env.BITDEX_FEE_TO
           ],
         });
 

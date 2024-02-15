@@ -79,7 +79,7 @@ async function main(verify) {
   }
 
   const outStruct = {
-    factoryAddress: factory.address,
+    factoryInstance: factory,
     initCodeHash: initCodeHash.replace(/^0x/, '') //trim off 0x for replacement in BitDexLibrary
   }
 

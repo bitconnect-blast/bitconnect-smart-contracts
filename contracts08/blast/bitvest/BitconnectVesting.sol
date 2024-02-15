@@ -5,8 +5,9 @@ import { IBlast } from "../../../contractsShared/blast/IBlast.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract BitconnectVesting is Ownable {
+contract BitconnectVesting is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     IERC20 public token;
 
@@ -31,7 +32,11 @@ contract BitconnectVesting is Ownable {
     error VestingHasNotStarted();
 
 
-    constructor(address _token, uint256 _vestingStartTime, address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo) {
+    constructor(address _token, uint256 _vestedTokenTotalAmount, uint256 _vestingStartTime, address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo) {
+
+        //transfer _vestedTokenTotalAmount tokens to be vested here
+        IERC20(_token).transferFrom(msg.sender, address(this), _vestedTokenTotalAmount);
+        
         token = IERC20(_token);
         vestingStartTime = _vestingStartTime;
 
@@ -55,7 +60,7 @@ contract BitconnectVesting is Ownable {
 
     //-----------------VESTING-----------------
 
-    function claim(uint256 _amount) external distributeAfterCall {
+    function claim(uint256 _amount) external nonReentrant distributeAfterCall {
         if(block.timestamp < vestingStartTime){
             revert VestingHasNotStarted();
         }

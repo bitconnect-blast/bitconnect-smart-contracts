@@ -3,14 +3,17 @@ require("dotenv").config();
 
 async function main() {
 
-  //INPUT: FEE MANAGER ADDRESS
-  const feeManagerAddress = process.env.BLAST_FEE_MANAGER; 
-
   //get deployer address
   const [deployer] = await hre.ethers.getSigners();
 
   const Disperse = await hre.ethers.getContractFactory("BitSend");
-  const disperse = await Disperse.connect(deployer).deploy(feeManagerAddress);
+
+  // constructor(address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo)
+  const disperse = await Disperse.connect(deployer).deploy(
+    process.env.BLAST_FEE_MANAGER,
+    process.env.MIN_CLAIM_RATE_BIPS,
+    process.env.BLAST_GAS_FEE_TO
+  );
 
   await disperse.deployed();
 
