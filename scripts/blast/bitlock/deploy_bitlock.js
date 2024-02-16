@@ -1,63 +1,62 @@
 const hre = require("hardhat");
 
-async function main() {
+async function main(verify) {
 
   //get deployer address
   const [deployer] = await hre.ethers.getSigners();
-  const factoryAddress = process.env.BITDEX_FACTORY_ADDRESS;
 
-  /**
-   * Later, add address and amount for bitconnect token which will be used as referral token
-   */
+  const Locker = await hre.ethers.getContractFactory("BitLock");
 
-  const Locker = await hre.ethers.getContractFactory("UniswapV2Locker");
-  const locker = await Locker.connect(deployer).deploy(factoryAddress);
+  console.log("Environment Variables:", process.env.BLAST_FEE_MANAGER, process.env.MIN_CLAIM_RATE_BIPS, process.env.BLAST_GAS_FEE_TO);
 
-  await locker.deployed();
 
-  console.log(
-    `========================
-    \nLocker Deployed to: ${locker.address}
-    \nUniswap Factory Input: ${factoryAddress}
-    \n========================`
+  // constructor(address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo)
+  const locker = await Locker.connect(deployer).deploy(
+    process.env.BLAST_FEE_MANAGER,
+    process.env.MIN_CLAIM_RATE_BIPS,
+    process.env.BLAST_GAS_FEE_TO
   );
 
-  let LOCKER_VERIFIED = false;
+  console.log("locker deployed...");
+  
+  if(verify){
+    let LOCKER_VERIFIED = false;
 
-  while(!LOCKER_VERIFIED){
-  try{
-      //wait 5 seconds
-      await new Promise(r => setTimeout(r, 5000));
+    while(!LOCKER_VERIFIED){
+      try{
+          //wait 5 seconds
+          await new Promise(r => setTimeout(r, 5000));
 
-      console.log('Verifying Locker contract on Etherscan...');
-          await hre.run('verify:verify', {
-          address: locker.address,
-          constructorArguments: [
-              factoryAddress, 
-          ],
-      });
+          console.log('Verifying Locker contract on Etherscan...');
+              await hre.run('verify:verify', {
+              address: locker.address,
+              constructorArguments: [
+                process.env.BLAST_FEE_MANAGER,
+                process.env.MIN_CLAIM_RATE_BIPS,
+                process.env.BLAST_GAS_FEE_TO
+              ],
+          });
 
-      console.log('Factory contract verified on Etherscan');  
-      LOCKER_VERIFIED = true;  
+          console.log('Locker contract verified on Etherscan');  
+          LOCKER_VERIFIED = true;  
 
-  } catch(error) {
-      console.log('Factory contract verification failed');
-      console.log(error);
-      //if error contains "already" then contract is already verified and set VERIFIED to true
-      if(error.toString().includes("already")) {
-      console.log('Factory contract already verified on Etherscan');
-      LOCKER_VERIFIED = true;
-      } else {
-      console.log('Factory contract not verified. Trying again...');
-      }
-  }    
+      } catch(error) {
+          console.log('Locker contract verification failed');
+          console.log(error);
+          //if error contains "already" then contract is already verified and set VERIFIED to true
+          if(error.toString().includes("already")) {
+            console.log('Locker contract already verified on Etherscan');
+          LOCKER_VERIFIED = true;
+          } else {
+            console.log('Locker contract not verified. Trying again...');
+          }
+      }    
+    }      
   }
 
+  return locker;
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+module.exports = {
+  main
+}

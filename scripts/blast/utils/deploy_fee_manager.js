@@ -10,14 +10,10 @@ async function main(verify) {
 
   await feeManager.deployed();
 
-  // console.log(
+  console.log("FeeManager deployed to:", feeManager.address);
 
-  //   `========================
-  //   \n FeeManager Deployed to: ${feeManager.address}
-  //   \n========================`
-  // );
   if(verify){
-    let FEEMANAGER_VERIFIED = true; //leave as true if not verifying
+    let FEEMANAGER_VERIFIED = false; //leave as true if not verifying
 
     while(!FEEMANAGER_VERIFIED){
     try{
@@ -47,7 +43,7 @@ async function main(verify) {
     }
   }
 
-  return feeManager.address;
+  return feeManager;
 }
 
 module.exports = {

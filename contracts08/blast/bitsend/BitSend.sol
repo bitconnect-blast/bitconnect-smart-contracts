@@ -40,22 +40,22 @@ contract BitSend is Ownable {
         (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
     }
 
-    function disperseEther(address[] memory recipients, uint256[] memory values) external payable {
-        transactionCount++;
+    function disperseEther(address[] memory recipients, uint256[] memory values) external payable distributeAfterCall {
         for (uint256 i = 0; i < recipients.length; i++) {
-            (bool success, ) = recipients[i].call{value: values[i]}("");
+            address payable recipient = payable(recipients[i]);
+            (bool success, ) = recipient.call{value: values[i]}("");
             require(success, "Ether transfer failed");
         }
         uint256 balance = address(this).balance;
         if (balance > 0) {
-            (bool success, ) = msg.sender.call{value: balance}("");
+            address payable sender = payable(msg.sender);
+            (bool success, ) = sender.call{value: balance}("");
             require(success, "Refund transfer failed");
         }
 
     }
 
-    function disperseToken(IERC20 token, address[] memory recipients, uint256[] memory values) external {
-        transactionCount++;
+    function disperseToken(IERC20 token, address[] memory recipients, uint256[] memory values) external distributeAfterCall {
         uint256 total = 0;
         for (uint256 i = 0; i < recipients.length; i++) {
             total += values[i];

@@ -17,14 +17,9 @@ async function main() {
 
   await disperse.deployed();
 
-  console.log(
+  console.log("BitSend deployed to:", disperse.address);
 
-    `========================
-    \n Disperse Deployed to: ${disperse.address}
-    \n========================`
-  );
-
-  let DISPERSE_VERIFIED = true; //leave as true if not verifying
+  let DISPERSE_VERIFIED = false; //leave as true if not verifying
 
   while(!DISPERSE_VERIFIED){
   try{
@@ -34,7 +29,11 @@ async function main() {
       console.log('Verifying Disperse contract on Etherscan...');
           await hre.run('verify:verify', {
           address: disperse.address,
-          constructorArguments: [feeManagerAddress],
+          constructorArguments: [
+            process.env.BLAST_FEE_MANAGER,
+            process.env.MIN_CLAIM_RATE_BIPS,
+            process.env.BLAST_GAS_FEE_TO
+          ],
       });
 
       console.log('Disperse contract verified on Etherscan');  
@@ -52,14 +51,19 @@ async function main() {
       }
   }    
   }
+
+  return disperse;
+
 }
+
+module.exports = { main };
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+// main().catch((error) => {
+//   console.error(error);
+//   process.exitCode = 1;
+// });
 
 //deploys
 /**

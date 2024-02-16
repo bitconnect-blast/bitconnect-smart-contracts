@@ -17,6 +17,8 @@ async function main(verify) {
 
   await bitVault.deployed();
 
+  console.log("BitVault deployed to:", bitVault.address);
+
   if(verify){
     let BITVAULT_VERIFIED = false; //leave as true if not verifying
 
@@ -27,7 +29,7 @@ async function main(verify) {
 
         console.log('Verifying BitVault contract on Etherscan...');
             await hre.run('verify:verify', {
-            address: feeManager.address,
+            address: bitVault.address,
             constructorArguments: [
                 process.env.BITCONNECT_TOKEN_ADDRESS,
                 process.env.BLAST_FEE_MANAGER,

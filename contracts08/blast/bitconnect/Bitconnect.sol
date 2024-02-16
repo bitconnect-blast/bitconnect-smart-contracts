@@ -487,6 +487,13 @@ contract BITCONNECT is ERC20, Ownable {
         launchedTime = block.timestamp;
     }
 
+    function exemptFromLimits(address[] memory _addresses) external onlyOwner {
+        for (uint256 i = 0; i < _addresses.length; i++) {
+            excludeFromFees(_addresses[i], true);
+            excludeFromMaxTransaction(_addresses[i], true);
+        }
+    }
+
     function removeLimits() external onlyOwner {
         limitsInEffect = false;
     }

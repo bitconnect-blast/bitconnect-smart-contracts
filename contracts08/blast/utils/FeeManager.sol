@@ -2,17 +2,24 @@
 pragma solidity ^0.8.19;
 
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
+import { IBlast } from "../../../contractsShared/blast/IBlast.sol";
 
 interface IBitSend {
     function disperseEther(address[] memory recipients, uint256[] memory values) external payable;
 }
 
 contract FeeManager is Ownable {
+    IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
+
     uint256 private constant BPS_DENOMINATOR = 10000;
     
     address public bitSend;
     address[] private feeOutputs;
     uint256[] private feeBps;
+
+    constructor() {
+        BLAST.configureClaimableYield();
+    }
     
     receive() external payable {}
     
@@ -41,5 +48,12 @@ contract FeeManager is Ownable {
         bitSend = _bitsend;
     }
 
+	function claimYield(uint256 amount) external onlyOwner {
+		BLAST.claimYield(address(this), address(this), amount);
+    }
+
+	function claimAllYield() external onlyOwner {
+		BLAST.claimAllYield(address(this), address(this));
+    }
 }
 

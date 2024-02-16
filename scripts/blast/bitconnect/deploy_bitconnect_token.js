@@ -13,13 +13,17 @@ async function main(verify) {
   //================================================================================= 
   //=================================================================================
   //===CHECK BEFORE DEPLOY===========================================================
-  const feeManager = process.env.BLAST_FEE_MANAGER;
   const LP_ETH_AMOUNT = hre.ethers.utils.parseEther(process.env.BIT_LP_ETH_AMOUNT); //CHECK!
-  const NAME = process.env.TOKEN_NAME; //CHECK!
-  const SYMBOL = process.env.TOKEN_SYMBOL; //CHECK!
-  const MIN_CLAIM_RATE_BIPS = process.env.MIN_CLAIM_RATE_BIPS; //CHECK!
   const AUTO_ADJUST_LIMITS_AND_TAX = process.env.AUTO_ADJUST_LIMITS_AND_TAX; //CHECK!
 
+  // ENV VARS USED IN DEPLOY IN ADDITION TO THE ABOVE:
+  // process.env.TOKEN_NAME, 
+  // process.env.TOKEN_SYMBOL, 
+  // process.env.BLAST_FEE_MANAGER,
+  // process.env.BITDEX_ROUTER_ADDRESS,
+  // process.env.BLAST_FEE_MANAGER,
+  // process.env.MIN_CLAIM_RATE_BIPS,
+  // process.env.BLAST_GAS_FEE_TO
   //================================================================================
   //=================================================================================
   //=================================================================================
@@ -38,13 +42,13 @@ async function main(verify) {
   //   uint256 _minClaimRateBips,
   //   address _gasFeeTo
   const contract = await BitConnect.deploy(
-    NAME, 
-    SYMBOL, 
-    feeManager,
-    bitdexRouteraddress,
-    feeManager,
-    MIN_CLAIM_RATE_BIPS,
-    process.env.BITDEX_FEE_TO
+    process.env.TOKEN_NAME, 
+    process.env.TOKEN_SYMBOL, 
+    process.env.BLAST_FEE_MANAGER,
+    process.env.BITDEX_ROUTER_ADDRESS,
+    process.env.BLAST_FEE_MANAGER,
+    process.env.MIN_CLAIM_RATE_BIPS,
+    process.env.BLAST_GAS_FEE_TO
   );
 
   await contract.deployed();
@@ -90,13 +94,13 @@ async function main(verify) {
         await hre.run('verify:verify', {
           address: contract.address,
           constructorArguments: [
-            NAME, 
-            SYMBOL, 
-            feeManager,
-            bitdexRouteraddress,
-            feeManager,
-            MIN_CLAIM_RATE_BIPS,
-            process.env.BITDEX_FEE_TO
+            process.env.TOKEN_NAME, 
+            process.env.TOKEN_SYMBOL, 
+            process.env.BLAST_FEE_MANAGER,
+            process.env.BITDEX_ROUTER_ADDRESS,
+            process.env.BLAST_FEE_MANAGER,
+            process.env.MIN_CLAIM_RATE_BIPS,
+            process.env.BLAST_GAS_FEE_TO
           ],
         });
 

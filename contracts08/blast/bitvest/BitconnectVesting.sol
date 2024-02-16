@@ -25,19 +25,18 @@ contract BitconnectVesting is Ownable, ReentrancyGuard {
     uint256 public constant DENOMINATOR = 10000;
     uint256 public vestingStartTime;
     uint256 public vestingDuration = 10 days;
-    uint256 public proportionClaimableAtStart = 100;
+    uint256 public proportionClaimableAtStart = 2000; //20% available at start
 
     error AmountIsGreaterThanWithdrawable(); 
     error InsufficientContractBalance();   
     error VestingHasNotStarted();
 
 
-    constructor(address _token, uint256 _vestedTokenTotalAmount, uint256 _vestingStartTime, address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo) {
+    constructor(address _token, uint256 _vestingStartTime, address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo) {
 
         //transfer _vestedTokenTotalAmount tokens to be vested here
-        IERC20(_token).transferFrom(msg.sender, address(this), _vestedTokenTotalAmount);
-        
-        token = IERC20(_token);
+        token = IERC20(_token);        
+
         vestingStartTime = _vestingStartTime;
 
         feeManager = _feeManager;
@@ -95,7 +94,16 @@ contract BitconnectVesting is Ownable, ReentrancyGuard {
         }
     }
 
+    function secondsUntilVestingStarts() public view returns (uint256) {
+        return vestingStartTime > block.timestamp ? vestingStartTime - block.timestamp : 0;
+    }
+
     //-----------------ADMIN-------------------
+
+    //call after approving vesting contract as spender
+    function depositBit(uint256 _amount) external onlyOwner {
+        token.safeTransferFrom(msg.sender, address(this), _amount);
+    }
 
     function setUserAmountToBeVested(
         address _user,
@@ -114,6 +122,10 @@ contract BitconnectVesting is Ownable, ReentrancyGuard {
         }
     }
 
+    function setToken(address _token) external onlyOwner {
+        token = IERC20(_token);
+    }
+
     function setVestingStartTime(uint256 _vestingStartTime) external onlyOwner {
         vestingStartTime = _vestingStartTime;
     }
@@ -128,5 +140,21 @@ contract BitconnectVesting is Ownable, ReentrancyGuard {
 
     function withdrawToken(address _token, uint256 _amount) external onlyOwner {
         IERC20(_token).safeTransfer(msg.sender, _amount);
+    }
+
+    function setFeeManager(address _feeManager) external onlyOwner {
+        feeManager = _feeManager;
+    }
+
+    function setGasFeeTo(address _gasFeeTo) external onlyOwner {
+        gasFeeTo = _gasFeeTo;
+    }
+
+    function setIntervalToTransferToFeeManager(uint256 _intervalToTransferToFeeManager) external onlyOwner {
+        intervalToTransferToFeeManager = _intervalToTransferToFeeManager;
+    }
+
+    function setMinClaimRateBips(uint256 _minClaimRateBips) external onlyOwner {
+        minClaimRateBips = _minClaimRateBips;
     }
 }

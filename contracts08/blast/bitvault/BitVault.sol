@@ -7,7 +7,6 @@ import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract BitVault is Ownable, ReentrancyGuard {
-    IERC20 public bitToken;
     uint256 public constant BASE = 100;
     uint256 public constant ONE_DAY = 86400;
 
@@ -32,8 +31,9 @@ contract BitVault is Ownable, ReentrancyGuard {
     event Withdraw(address indexed user, uint256 amount, address token);
 
     constructor(address _bitToken, address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo) {
-        bitToken = IERC20(_bitToken);
-        
+        authorizedTokenAddress[_bitToken] = true;
+        tokenMultiplerAddPerDay[_bitToken] = 3; //3%/day added to multiplier
+
         feeManager = _feeManager;
         //sets up the blast contract to be able to claim gas fees
         BLAST.configureClaimableGas();      
@@ -96,9 +96,8 @@ contract BitVault is Ownable, ReentrancyGuard {
 
     function getUserMultiplier(address _tokenAddress, address _userAddress) internal view returns (uint256) {
         uint256 elapsedDays = (block.timestamp - lastUpdate[_tokenAddress][_userAddress]) / ONE_DAY;
-        return(
-            (BASE + (tokenMultiplerAddPerDay[_tokenAddress] * elapsedDays)) / BASE
-        );
+        // Multiply first to avoid truncation error
+        return BASE + (tokenMultiplerAddPerDay[_tokenAddress] * elapsedDays);
     }
 
     // View function to get the current weighted token-seconds for a user
@@ -106,12 +105,26 @@ contract BitVault is Ownable, ReentrancyGuard {
         uint256 timeElapsed = block.timestamp - lastUpdate[_tokenAddress][_userAddress];
         uint256 currentWeightedTokenSeconds = userWeightedTokenSeconds[_tokenAddress][_userAddress];
         if (timeElapsed > 0 && userBalances[_tokenAddress][_userAddress] > 0) {
-            currentWeightedTokenSeconds += timeElapsed * userBalances[_tokenAddress][_userAddress] * getUserMultiplier(_tokenAddress, _userAddress);
+            // Apply the multiplier directly in the calculation to avoid truncation
+            currentWeightedTokenSeconds += (timeElapsed * userBalances[_tokenAddress][_userAddress] * getUserMultiplier(_tokenAddress, _userAddress)) / BASE;
         }
         return currentWeightedTokenSeconds;
     }
 
     //-----------------------------
+
+    function addNewAuthorizedTokenAndMultiplier(address _tokenAddress, uint256 _multiplierPercentageAddPerDay) external onlyOwner {
+        authorizedTokenAddress[_tokenAddress] = true;
+        tokenMultiplerAddPerDay[_tokenAddress] = _multiplierPercentageAddPerDay;
+    }
+
+    function removeAuthorizedToken(address _tokenAddress) external onlyOwner {
+        authorizedTokenAddress[_tokenAddress] = false;
+    }
+
+    function setMultiplierPercentageAddPerDay(address _tokenAddress, uint256 _multiplierPercentageAddPerDay) external onlyOwner {
+        tokenMultiplerAddPerDay[_tokenAddress] = _multiplierPercentageAddPerDay;
+    }
 
     function setMinClaimRateBips(uint256 _minClaimRateBips) external onlyOwner {
         minClaimRateBips = _minClaimRateBips;
