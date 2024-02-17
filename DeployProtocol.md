@@ -44,14 +44,14 @@
     3. Be sure to include all set variables (feeManager, gasFeeTo, etc.) in each contract that uses them
 
 ## Links from testing.json deploy addresses
-Fee Manager: https://testnet.blastscan.io/address/0x348Be2AadDA55C125A50eE329b118CE5538546Ab
-BitDex Factory: https://testnet.blastscan.io/address/0xD222cb17af8f6536466b0D031b675bf47B9E53c2
-BitDex Router: https://testnet.blastscan.io/address/0x2Ee143bfA8BE928613b5e8E669e7d4d084EFF756
-Bitconnect Token: https://testnet.blastscan.io/address/0x504Bf0Ba6B63fDef91eE61f8b9EaD4741f6F437e
-BitVest: https://testnet.blastscan.io/address/0xDa7983D0d57C09A6B81460f1C4716C0666326c3a
-BitVault: https://testnet.blastscan.io/address/0x4B0B5308CD3B4eFA64740db3aa6D54D8135dEb83
-BitLock: https://testnet.blastscan.io/address/0xfF0F72894d5Ad3E6051765cDe810c18A656947f6
-BitSend: https://testnet.blastscan.io/address/0xF7328f471d4F60161a1f7099c11E1C21d36D7321
+- Fee Manager: https://testnet.blastscan.io/address/0x348Be2AadDA55C125A50eE329b118CE5538546Ab
+- BitDex Factory: https://testnet.blastscan.io/address/0xD222cb17af8f6536466b0D031b675bf47B9E53c2
+- BitDex Router: https://testnet.blastscan.io/address/0x2Ee143bfA8BE928613b5e8E669e7d4d084EFF756
+- Bitconnect Token: https://testnet.blastscan.io/address/0x504Bf0Ba6B63fDef91eE61f8b9EaD4741f6F437e
+- BitVest: https://testnet.blastscan.io/address/0xDa7983D0d57C09A6B81460f1C4716C0666326c3a
+- BitVault: https://testnet.blastscan.io/address/0x4B0B5308CD3B4eFA64740db3aa6D54D8135dEb83
+- BitLock: https://testnet.blastscan.io/address/0xfF0F72894d5Ad3E6051765cDe810c18A656947f6
+- BitSend: https://testnet.blastscan.io/address/0xF7328f471d4F60161a1f7099c11E1C21d36D7321
 
 
 
