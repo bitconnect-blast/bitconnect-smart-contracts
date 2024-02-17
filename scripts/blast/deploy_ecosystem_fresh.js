@@ -1,29 +1,3 @@
-/**
- * The overall script to deploy all ecosystem components and set all state variables
- * 1. Deploy bitconnect dex (BitDex, Uniswap V2 Fork)
- *  - Factory (in script: feeManager, feeToSetter, feeTo)
- *  - Router (in script: feeManager, factory, WETH)
- *  - Multicall
- * 2. Deploy bitconnect token ($BIT)
- *  - constructor takes: fee manager address
- * 3. Deploy bitconnect token vesting (BitVest) and set vesting state variables 
- *  - constructor takes fee manager address
- *  - constructor takes bitconnect token address
- *  - set vesting schedule start time (shortly after dex pool is up and running)
- * 4. Deploy staking + reward vault (BitVault)
- *  - constructor takes fee manager address
- *  - constructor takes bitconnect token address
- * 5. Deploy Token Locker (BitLock)
- *  - constructor takes fee manager address
- * 6. Deploy Disperse (BitSend)
- *  - constructor takes fee manager address
- * 7. Deploy Miner (BitMiner)
- *  - TODO: figure this out with elz
- *  - after this is deployed, call setGasFeeTo on every contract where it's present and assigned manually (i.e. not read via interface to another contract) - includes factory, router, bitsend, .. likely all contracts
-
- * After all deploys, saves a .json file with all contract addresses and state variables
- */
-
 const hre = require("hardhat");
 const fs = require('fs');
 const path = require('path');
