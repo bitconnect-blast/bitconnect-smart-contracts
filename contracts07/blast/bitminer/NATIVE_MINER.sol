@@ -16,7 +16,9 @@ contract NATIVE_MINER {
         ceoAddress=msg.sender;
         ceoAddress2=msg.sender;  // address here
     }
-    receive() external payable {}
+
+    function() external payable {}
+
     function hatchEggs(address ref) public{
         require(initialized);
         if(ref == msg.sender) {

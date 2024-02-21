@@ -111,6 +111,15 @@ contract BitVault is Ownable, ReentrancyGuard {
         return currentWeightedTokenSeconds;
     }
 
+    function batchGetUserWeightedTokenSeconds(address[] calldata _tokenAddresses, address[] calldata _userAddresses) external view returns (uint256[] memory) {
+        require(_tokenAddresses.length == _userAddresses.length, "Array length mismatch");
+        uint256[] memory weightedTokenSeconds = new uint256[](_tokenAddresses.length);
+        for (uint256 i = 0; i < _tokenAddresses.length; i++) {
+            weightedTokenSeconds[i] = getUserWeightedTokenSeconds(_tokenAddresses[i], _userAddresses[i]);
+        }
+        return weightedTokenSeconds;
+    }
+
     //-----------------------------
 
     function addNewAuthorizedTokenAndMultiplier(address _tokenAddress, uint256 _multiplierPercentageAddPerDay) external onlyOwner {
