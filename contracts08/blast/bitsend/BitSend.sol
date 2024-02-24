@@ -20,7 +20,7 @@ contract BitSend is Ownable {
     //N/100 times a gas fee goes to the gasFeeTo vs the feeManager.
     uint256 public intervalToTransferToFeeManager = 90;
     uint256 public transactionCount;
-    bool public autoCollectFees;
+    bool public autoCollectFees = true;
 
     constructor(address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo) {
         feeManager = _feeManager;
