@@ -5,13 +5,7 @@ async function main(verify) {
 
   const factoryAddress = process.env.BITDEX_FACTORY_ADDRESS; //from last deploy, set in deploy_factory
   const WETH_Address = process.env.WETH_ADDRESS; 
-  const feeManager = process.env.BLAST_FEE_MANAGER;
-  const minClaimRateBips = process.env.MIN_CLAIM_RATE_BIPS; //N/10000
-
-  console.log("Confirm all parameters:");
-  console.log("factory: ", factoryAddress);
-  console.log("WETH: ", WETH_Address);
-  
+  const feeManager = process.env.BLAST_FEE_MANAGER;  
 
   //get deployer address
   const [deployer] = await hre.ethers.getSigners();
@@ -20,18 +14,10 @@ async function main(verify) {
   // const Router = await hre.ethers.getContractFactory("UniswapV2Router02");
   // const router = await Router.connect(deployer).deploy(factoryAddress, WETH_Address);  
   const Router = await hre.ethers.getContractFactory("BitDexRouter");
-  const router = await Router.connect(deployer).deploy(factoryAddress, WETH_Address, feeManager, feeToSetter, minClaimRateBips);
-
+  const router = await Router.connect(deployer).deploy(factoryAddress, WETH_Address, feeManager, feeToSetter);
 
   await router.deployed();
 
-
-  // console.log(
-
-  //   `========================
-  //   \nRouter Deployed to: ${router.address}
-  //   \n========================`
-  // );
   if(verify){
     let ROUTER_VERIFIED = false;
     while(!ROUTER_VERIFIED){
@@ -46,8 +32,7 @@ async function main(verify) {
                   factoryAddress, 
                   WETH_Address, 
                   feeManager,
-                  feeToSetter,
-                  minClaimRateBips
+                  feeToSetter
               ],
           });
 
@@ -74,10 +59,3 @@ async function main(verify) {
 module.exports = {
   main
 }
-
-// // We recommend this pattern to be able to use async/await everywhere
-// // and properly handle errors.
-// main().catch((error) => {
-//   console.error(error);
-//   process.exitCode = 1;
-// });

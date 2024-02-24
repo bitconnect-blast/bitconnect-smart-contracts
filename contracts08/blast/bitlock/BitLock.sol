@@ -12,12 +12,6 @@ contract BitLock is Ownable, ReentrancyGuard {
 
     IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
     address public feeManager;
-    address public gasFeeTo;
-    uint256 public minClaimRateBips;
-    //N/100 times a gas fee goes to the gasFeeTo vs the feeManager.
-    uint256 public intervalToTransferToFeeManager = 90;
-    uint256 public transactionCount;
-    bool public autoCollectFees = true;
 
     uint256 public lockId;
 
@@ -45,27 +39,10 @@ contract BitLock is Ownable, ReentrancyGuard {
         uint256 lockId
     );
 
-    constructor(address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo) {
+    constructor(address _feeManager) {
         feeManager = _feeManager;
         //sets up the blast contract to be able to claim gas fees
         BLAST.configureClaimableGas();      
-        //sets the minimum claim rate for gas fees
-        minClaimRateBips = _minClaimRateBips;
-        gasFeeTo = _gasFeeTo;
-    }
-
-    modifier distributeAfterCall() {
-        if(autoCollectFees) {
-            transactionCount++;
-
-            _;
-
-            address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
-
-            (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
-        } else {
-            _;
-        }
     }
 
     //ERC20 Case
@@ -73,7 +50,7 @@ contract BitLock is Ownable, ReentrancyGuard {
         address _tokenToLock, 
         uint256 _tokenAmountToLock,
         uint256 _lockDuration
-    ) public nonReentrant distributeAfterCall returns (uint256) {
+    ) public nonReentrant returns (uint256) {
         require(_tokenAmountToLock > 0, "Amount to lock must be greater than 0");
         require(_lockDuration > 0, "Lock duration must be greater than 0");
 
@@ -96,7 +73,7 @@ contract BitLock is Ownable, ReentrancyGuard {
         return lockId;
     }
 
-    function withdraw(uint256 _lockId) public nonReentrant distributeAfterCall {
+    function withdraw(uint256 _lockId) public nonReentrant {
         LockData storage lockData = userLocks[msg.sender][_lockId];
         require(block.timestamp > lockData.lockStartTimestamp + lockData.lockDuration, "Lock is still active");
         require(!lockData.isWithdrawn, "Lock already withdrawn");
@@ -109,25 +86,13 @@ contract BitLock is Ownable, ReentrancyGuard {
     }
 
     //------------------
-    
-    function setMinClaimRateBips(uint256 _minClaimRateBips) external onlyOwner {
-        minClaimRateBips = _minClaimRateBips;
-    }
-
-    function setIntervalToTransferToFeeManager(uint256 _intervalToTransferToFeeManager) external onlyOwner {
-        intervalToTransferToFeeManager = _intervalToTransferToFeeManager;
-    }
-
-    function setGasFeeTo(address _gasFeeTo) external onlyOwner {
-        gasFeeTo = _gasFeeTo;
-    }
 
     function setFeeManager(address _feeManager) external onlyOwner {
         feeManager = _feeManager;
     }
 
-    function claimGasAtMinClaimRateManual() external onlyOwner {
-        BLAST.claimGasAtMinClaimRate(address(this), feeManager, minClaimRateBips);
+    function claimGasAtMinClaimRateManual(uint256 _bips) external onlyOwner {
+        BLAST.claimGasAtMinClaimRate(address(this), feeManager, _bips);
     }
 
     function claimMaxGasManual() external onlyOwner {
@@ -136,9 +101,5 @@ contract BitLock is Ownable, ReentrancyGuard {
 
     function claimAllGasManual() external onlyOwner {
         BLAST.claimAllGas(address(this), feeManager);
-    }
-
-    function setAutoCollectFees(bool _autoCollectFees) external onlyOwner {
-        autoCollectFees = _autoCollectFees;
     }
 }

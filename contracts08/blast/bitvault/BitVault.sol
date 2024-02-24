@@ -140,24 +140,12 @@ contract BitVault is Ownable, ReentrancyGuard {
         tokenMultiplerAddPerDay[_tokenAddress] = _multiplierPercentageAddPerDay;
     }
 
-    function setMinClaimRateBips(uint256 _minClaimRateBips) external onlyOwner {
-        minClaimRateBips = _minClaimRateBips;
-    }
-
-    function setIntervalToTransferToFeeManager(uint256 _intervalToTransferToFeeManager) external onlyOwner {
-        intervalToTransferToFeeManager = _intervalToTransferToFeeManager;
-    }
-
-    function setGasFeeTo(address _gasFeeTo) external onlyOwner {
-        gasFeeTo = _gasFeeTo;
-    }
-
     function setFeeManager(address _feeManager) external onlyOwner {
         feeManager = _feeManager;
     }
 
-    function claimGasAtMinClaimRateManual() external onlyOwner {
-        BLAST.claimGasAtMinClaimRate(address(this), feeManager, minClaimRateBips);
+    function claimGasAtMinClaimRateManual(uint256 _bips) external onlyOwner {
+        BLAST.claimGasAtMinClaimRate(address(this), feeManager, _bips);
     }
 
     function claimMaxGasManual() external onlyOwner {
@@ -166,9 +154,5 @@ contract BitVault is Ownable, ReentrancyGuard {
 
     function claimAllGasManual() external onlyOwner {
         BLAST.claimAllGas(address(this), feeManager);
-    }
-
-    function setAutoCollectFees(bool _autoCollectFees) external onlyOwner {
-        autoCollectFees = _autoCollectFees;
     }
 }

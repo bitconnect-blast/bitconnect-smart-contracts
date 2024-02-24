@@ -14,11 +14,5 @@ interface IBitDexFactory {
 
     function setFeeTo(address) external;
     function setFeeToSetter(address) external;
-
-    function gasFeeTo() external view returns (address);
     function feeManager() external view returns (address);
-    function minClaimRateBips() external view returns (uint256);
-    function intervalToTransferToFeeManager() external view returns (uint256);
-
-    function autoCollectFees() external view returns (bool);
 }

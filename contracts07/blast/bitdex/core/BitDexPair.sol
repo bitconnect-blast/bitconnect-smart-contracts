@@ -32,7 +32,6 @@ contract BitDexPair is IBitDexPair, BitDexERC20 {
     //blast
     IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
     IERC20Rebasing public constant WETH = IERC20Rebasing(0x4200000000000000000000000000000000000023);
-    uint256 public transactionCount;
 
     uint public constant MINIMUM_LIQUIDITY = 10**3;
     bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
@@ -57,37 +56,13 @@ contract BitDexPair is IBitDexPair, BitDexERC20 {
         unlocked = 1;
     }
 
-    modifier distributeAfterCall() {
-        IBitDexFactory factoryInterface = IBitDexFactory(factory);
-        if(factoryInterface.autoCollectFees() == true) {
-            transactionCount++;
-
-            _;
-
-            //fee distribution (gas + yield)
-            uint256 interval = factoryInterface.intervalToTransferToFeeManager();
-            address feeManager = factoryInterface.feeManager();
-            address gasFeeTo = factoryInterface.gasFeeTo();
-            uint256 minClaimRateBips = factoryInterface.minClaimRateBips();
-
-            (bool successClaim,) = address(WETH).call(abi.encodeWithSignature("claim(address,uint256)", feeManager, WETH.getClaimableAmount(address(this))));
-
-            address target = transactionCount % 100 < interval ? gasFeeTo : feeManager;
-
-            (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
-        }
-        else {
-            _;
-        }
-    }
-
     function getReserves() public view returns (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast) {
         _reserve0 = reserve0;
         _reserve1 = reserve1;
         _blockTimestampLast = blockTimestampLast;
     }
 
-    function _safeTransfer(address token, address to, uint value) private distributeAfterCall {
+    function _safeTransfer(address token, address to, uint value) private {
         (bool success, bytes memory data) = token.call(abi.encodeWithSelector(SELECTOR, to, value));
         require(success && (data.length == 0 || abi.decode(data, (bool))), 'BitDex: TRANSFER_FAILED');
     }
@@ -120,7 +95,7 @@ contract BitDexPair is IBitDexPair, BitDexERC20 {
     }
 
     // update reserves and, on the first call per block, price accumulators
-    function _update(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private distributeAfterCall {      
+    function _update(uint balance0, uint balance1, uint112 _reserve0, uint112 _reserve1) private {      
         require(balance0 <= uint112(-1) && balance1 <= uint112(-1), 'BitDex: OVERFLOW');
         uint32 blockTimestamp = uint32(block.timestamp % 2**32);
         uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired
@@ -261,5 +236,4 @@ contract BitDexPair is IBitDexPair, BitDexERC20 {
 
         return (successWethYield, successGas);
     }
-
 }

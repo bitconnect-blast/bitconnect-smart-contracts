@@ -134,7 +134,7 @@ module.exports = {
       forking: {
         enabled: true,
         url: 'https://sepolia.blast.io',
-        blockNumber: 1683251,      
+        blockNumber: 2055000,      
         accounts: [process.env.PRIVATE_KEY_BLAST_SEPOLIA_PRODUCTION]
       },
 

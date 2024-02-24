@@ -365,12 +365,6 @@ contract BITCONNECT is ERC20, Ownable {
 
     IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
     address public feeManager;
-    address public gasFeeTo;
-    uint256 public minClaimRateBips;
-    //N/100 times a gas fee goes to the gasFeeTo vs the feeManager.
-    uint256 public intervalToTransferToFeeManager = 10;
-    uint256 public transactionCount;
-    bool public autoCollectFees = true;
 
     IUniswapV2Router02 public immutable uniswapV2Router;
     address public immutable uniswapV2Pair;
@@ -419,13 +413,9 @@ contract BITCONNECT is ERC20, Ownable {
         string memory _symbol,
         address _marketingWallet,
         address _uniswapV2RouterAddress,
-        address _feeManager,
-        uint256 _minClaimRateBips,
-        address _gasFeeTo
+        address _feeManager
     ) ERC20(_name, _symbol) {
         feeManager = _feeManager;
-        gasFeeTo = _gasFeeTo;
-        minClaimRateBips = _minClaimRateBips;
 
         //sets up the blast contract to be able to claim gas fees
         BLAST.configureClaimableGas();      
@@ -462,20 +452,6 @@ contract BITCONNECT is ERC20, Ownable {
         excludeFromMaxTransaction(address(0xdead), true);
 
         _mint(msg.sender, totalSupply);
-    }
-
-    modifier distributeAfterCall() {
-        if(autoCollectFees) {
-            transactionCount++;
-
-            _;
-
-            address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
-
-            (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
-        } else {
-            _;
-        }
     }
 
     receive() external payable {}
@@ -585,7 +561,7 @@ contract BITCONNECT is ERC20, Ownable {
         }
     }
 
-    function _transfer(address from, address to, uint256 amount) internal override distributeAfterCall {
+    function _transfer(address from, address to, uint256 amount) internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
 
@@ -704,24 +680,12 @@ contract BITCONNECT is ERC20, Ownable {
         (success,) = address(marketingWallet).call{value: totalETH}("");
     }
 
-    function setMinClaimRateBips(uint256 _minClaimRateBips) external onlyOwner {
-        minClaimRateBips = _minClaimRateBips;
-    }
-
-    function setIntervalToTransferToFeeManager(uint256 _intervalToTransferToFeeManager) external onlyOwner {
-        intervalToTransferToFeeManager = _intervalToTransferToFeeManager;
-    }
-
-    function setGasFeeTo(address _gasFeeTo) external onlyOwner {
-        gasFeeTo = _gasFeeTo;
-    }
-
     function setFeeManager(address _feeManager) external onlyOwner {
         feeManager = _feeManager;
     }
 
-    function claimGasAtMinClaimRateManual() external onlyOwner {
-        BLAST.claimGasAtMinClaimRate(address(this), feeManager, minClaimRateBips);
+    function claimGasAtMinClaimRateManual(uint256 _bips) external onlyOwner {
+        BLAST.claimGasAtMinClaimRate(address(this), feeManager, _bips);
     }
 
     function claimMaxGasManual() external onlyOwner {
@@ -730,9 +694,5 @@ contract BITCONNECT is ERC20, Ownable {
 
     function claimAllGasManual() external onlyOwner {
         BLAST.claimAllGas(address(this), feeManager);
-    }
-
-    function setAutoClaimFees(bool _autoCollectFees) external onlyOwner {
-        autoCollectFees = _autoCollectFees;
     }
 }

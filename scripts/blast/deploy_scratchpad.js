@@ -5,6 +5,7 @@ const deployBitLock = require("./bitlock/deploy_bitlock").main;
 const deployBitVest = require("./bitvest/deploy_vesting").main;
 const deployBitVault = require("./bitvault/deploy_bitvault").main;
 const deployBitSend = require("./bitsend/deploy_bitsend").main;
+
 /**
  * see deploys/testing.json for existing addresses used to fill in here
  */
@@ -13,6 +14,10 @@ async function main() {
   process.env.USE_CONTRACTS_07 = "false";
   const verify = true;
   const deployer = new ethers.Wallet(process.env.PRIVATE_KEY_BLAST_SEPOLIA_PRODUCTION, ethers.provider);
+  //deploy fee manager with >0.8
+  const feeManager = await deployFeeManager(verify);
+  process.env.BLAST_FEE_MANAGER = feeManager;
+  console.log("FeeManager Address: ", feeManager.address);
 
   // const feeManager = await deployFeeManagerScratchpad(verify);
 
@@ -109,10 +114,10 @@ async function deployBitconnectScratchpad(verify) {
   console.log("Bitconnect Address: ", bitconnectAddress);
 }
 
-async function deployFeeManagerScratchpad(verify) {
-    const feeManager = await deployFeeManager(verify);
-    console.log("FeeManager Address: ", feeManager.address);
-}
+// async function deployFeeManagerScratchpad(verify) {
+//     const feeManager = await deployFeeManager(verify);
+//     console.log("FeeManager Address: ", feeManager.address);
+// }
 
 main()
   .then(() => process.exit(0))

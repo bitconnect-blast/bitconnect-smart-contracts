@@ -15,37 +15,14 @@ interface IERC20 {
 contract BitSend is Ownable {
     IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
     address public feeManager;
-    address public gasFeeTo;
-    uint256 public minClaimRateBips;
-    //N/100 times a gas fee goes to the gasFeeTo vs the feeManager.
-    uint256 public intervalToTransferToFeeManager = 90;
-    uint256 public transactionCount;
-    bool public autoCollectFees = true;
 
-    constructor(address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo) {
+    constructor(address _feeManager) {
         feeManager = _feeManager;
         //sets up the blast contract to be able to claim gas fees
         BLAST.configureClaimableGas();      
-        //sets the minimum claim rate for gas fees
-        minClaimRateBips = _minClaimRateBips;
-        gasFeeTo = _gasFeeTo;
     }
 
-    modifier distributeAfterCall() {
-        if(autoCollectFees) {
-            transactionCount++;
-
-            _;
-
-            address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
-
-            (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
-        } else {
-            _;
-        }
-    }
-
-    function disperseEther(address[] memory recipients, uint256[] memory values) external payable distributeAfterCall {
+    function disperseEther(address[] memory recipients, uint256[] memory values) external payable {
         for (uint256 i = 0; i < recipients.length; i++) {
             address payable recipient = payable(recipients[i]);
             (bool success, ) = recipient.call{value: values[i]}("");
@@ -60,7 +37,7 @@ contract BitSend is Ownable {
 
     }
 
-    function disperseToken(IERC20 token, address[] memory recipients, uint256[] memory values) external distributeAfterCall {
+    function disperseToken(IERC20 token, address[] memory recipients, uint256[] memory values) external {
         uint256 total = 0;
         for (uint256 i = 0; i < recipients.length; i++) {
             total += values[i];
@@ -71,24 +48,12 @@ contract BitSend is Ownable {
         }
     }
 
-    function setMinClaimRateBips(uint256 _minClaimRateBips) external onlyOwner {
-        minClaimRateBips = _minClaimRateBips;
-    }
-
-    function setIntervalToTransferToFeeManager(uint256 _intervalToTransferToFeeManager) external onlyOwner {
-        intervalToTransferToFeeManager = _intervalToTransferToFeeManager;
-    }
-
-    function setGasFeeTo(address _gasFeeTo) external onlyOwner {
-        gasFeeTo = _gasFeeTo;
-    }
-
     function setFeeManager(address _feeManager) external onlyOwner {
         feeManager = _feeManager;
     }
 
-    function claimGasAtMinClaimRateManual() external onlyOwner {
-        BLAST.claimGasAtMinClaimRate(address(this), feeManager, minClaimRateBips);
+    function claimGasAtMinClaimRateManual(uint256 _bips) external onlyOwner {
+        BLAST.claimGasAtMinClaimRate(address(this), feeManager, _bips);
     }
 
     function claimMaxGasManual() external onlyOwner {
@@ -97,9 +62,5 @@ contract BitSend is Ownable {
 
     function claimAllGasManual() external onlyOwner {
         BLAST.claimAllGas(address(this), feeManager);
-    }
-
-    function setAutoCollectFees(bool _autoCollectFees) external onlyOwner {
-        autoCollectFees = _autoCollectFees;
     }
 }

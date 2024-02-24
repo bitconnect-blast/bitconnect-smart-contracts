@@ -8,17 +8,14 @@ async function main(verify) {
   const Vesting = await hre.ethers.getContractFactory("BitconnectVesting");
 
   // constructor(address _token, uint256 _vestedTokenTotalAmount, uint256 _vestingStartTime, address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo)
+
   const vesting = await Vesting.connect(deployer).deploy(
     process.env.BITCONNECT_TOKEN_ADDRESS,
     process.env.VESTING_START_TIME,
-    process.env.BLAST_FEE_MANAGER,
-    process.env.MIN_CLAIM_RATE_BIPS,
-    process.env.BLAST_GAS_FEE_TO
+    process.env.BLAST_FEE_MANAGER
   );
 
   await vesting.deployed();
-
-  console.log("Vesting deployed to:", vesting.address);
 
   if(verify){
     let VESTING_VERIFIED = false; //leave as true if not verifying
@@ -34,9 +31,7 @@ async function main(verify) {
               constructorArguments: [
                 process.env.BITCONNECT_TOKEN_ADDRESS,
                 process.env.VESTING_START_TIME,
-                process.env.BLAST_FEE_MANAGER,
-                process.env.MIN_CLAIM_RATE_BIPS,
-                process.env.BLAST_GAS_FEE_TO
+                process.env.BLAST_FEE_MANAGER
               ],
           });
 

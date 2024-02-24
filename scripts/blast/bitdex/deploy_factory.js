@@ -6,8 +6,6 @@ async function main(verify) {
 
   const feeTo = process.env.BITDEX_FEE_TO;
   const feeManager = process.env.BLAST_FEE_MANAGER; //(memory in-session env)
-  const minClaimRateBips = process.env.MIN_CLAIM_RATE_BIPS;
-  const intervalToTransferToFeeManager = process.env.INTERVAL_TO_TRANSFER_TO_FEE_MANAGER;
 
   const [deployer] = await hre.ethers.getSigners();
   const feeToSetter = deployer.address;//for testing
@@ -15,33 +13,20 @@ async function main(verify) {
   // const Factory = await hre.ethers.getContractFactory("UniswapV2Factory");
   // const factory = await Factory.connect(deployer).deploy(feeToSetter);
 
-  const Factory = await hre.ethers.getContractFactory("BitDexFactory");
-  const factory = await Factory.connect(deployer).deploy(
+  const BitDexFactory = await hre.ethers.getContractFactory("BitDexFactory");
+  const bitDexFactory = await BitDexFactory.connect(deployer).deploy(
     feeToSetter,
-    feeManager,
-    minClaimRateBips,
-    intervalToTransferToFeeManager
+    feeManager
   );
 
-  await factory.deployed();
+  await bitDexFactory.deployed();
 
   // set feeTo
-  const setFeeToTx = await factory.connect(deployer).setFeeTo(feeTo);
+  const setFeeToTx = await bitDexFactory.connect(deployer).setFeeTo(feeTo);
   await setFeeToTx.wait();
 
   //get init commit hash
-  const initCodeHash = await factory.INIT_CODE_HASH();
-
-  // console.log(
-
-  //   `========================
-  //   \nFactory Deployed to: ${factory.address}
-  //   \nINIT_CODE_HASH: ${initCodeHash}
-  //   \nfeeToSetter: ${feeToSetter.address}
-  //   \nfeeTo: ${feeTo}
-  //   \nPaste INIT_CODE_HASH into BitDexLibrary.sol Line 24 (excluding 0x)
-  //   \n========================`
-  // );
+  const initCodeHash = await bitDexFactory.INIT_CODE_HASH();
   
   if(verify){
     let FACTORY_VERIFIED = false;
@@ -52,12 +37,10 @@ async function main(verify) {
 
           console.log('Verifying Factory contract on Etherscan...');
               await hre.run('verify:verify', {
-              address: factory.address,
+              address: bitDexFactory.address,
               constructorArguments: [
                   deployer.address, 
-                  feeManager,
-                  minClaimRateBips,
-                  intervalToTransferToFeeManager
+                  feeManager
               ],
           });
 
@@ -79,7 +62,7 @@ async function main(verify) {
   }
 
   const outStruct = {
-    factoryInstance: factory,
+    factoryInstance: bitDexFactory,
     initCodeHash: initCodeHash.replace(/^0x/, '') //trim off 0x for replacement in BitDexLibrary
   }
 
@@ -89,10 +72,3 @@ async function main(verify) {
 module.exports = {
   main
 }
-
-// // We recommend this pattern to be able to use async/await everywhere
-// // and properly handle errors.
-// main().catch((error) => {
-//   console.error(error);
-//   process.exitCode = 1;
-// });

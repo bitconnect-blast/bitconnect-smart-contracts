@@ -40,7 +40,7 @@ async function main(verify) {
     }
   }
 
-  return multicall.address;
+  return multicall;
 }
 
 module.exports = {

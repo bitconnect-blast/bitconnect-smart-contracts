@@ -13,12 +13,6 @@ contract BitconnectVesting is Ownable, ReentrancyGuard {
 
     IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
     address public feeManager;
-    address public gasFeeTo;
-    uint256 public minClaimRateBips;
-    //N/100 times a gas fee goes to the gasFeeTo vs the feeManager.
-    uint256 public intervalToTransferToFeeManager = 90;
-    uint256 public transactionCount;
-    bool public autoCollectFees = true;
 
     mapping(address => uint256) public userAmountToBeVested;
     mapping(address => uint256) public userClaimedAmount;
@@ -33,7 +27,7 @@ contract BitconnectVesting is Ownable, ReentrancyGuard {
     error VestingHasNotStarted();
 
 
-    constructor(address _token, uint256 _vestingStartTime, address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo) {
+    constructor(address _token, uint256 _vestingStartTime, address _feeManager) {
 
         //transfer _vestedTokenTotalAmount tokens to be vested here
         token = IERC20(_token);        
@@ -43,28 +37,11 @@ contract BitconnectVesting is Ownable, ReentrancyGuard {
         feeManager = _feeManager;
         //sets up the blast contract to be able to claim gas fees
         BLAST.configureClaimableGas();      
-        //sets the minimum claim rate for gas fees
-        minClaimRateBips = _minClaimRateBips;
-        gasFeeTo = _gasFeeTo;
-    }
-
-    modifier distributeAfterCall() {
-        if(autoCollectFees) {
-            transactionCount++;
-
-            _;
-
-            address target = transactionCount % 100 == 0 ? gasFeeTo : feeManager;
-
-            (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
-        } else {
-            _;
-        }
     }
 
     //-----------------VESTING-----------------
 
-    function claim(uint256 _amount) external nonReentrant distributeAfterCall {
+    function claim(uint256 _amount) external nonReentrant {
         if(block.timestamp < vestingStartTime){
             revert VestingHasNotStarted();
         }
@@ -151,19 +128,15 @@ contract BitconnectVesting is Ownable, ReentrancyGuard {
         feeManager = _feeManager;
     }
 
-    function setGasFeeTo(address _gasFeeTo) external onlyOwner {
-        gasFeeTo = _gasFeeTo;
+    function claimGasAtMinClaimRateManual(uint256 _bips) external onlyOwner {
+        BLAST.claimGasAtMinClaimRate(address(this), feeManager, _bips);
     }
 
-    function setIntervalToTransferToFeeManager(uint256 _intervalToTransferToFeeManager) external onlyOwner {
-        intervalToTransferToFeeManager = _intervalToTransferToFeeManager;
+    function claimMaxGasManual() external onlyOwner {
+        BLAST.claimMaxGas(address(this), feeManager);
     }
 
-    function setMinClaimRateBips(uint256 _minClaimRateBips) external onlyOwner {
-        minClaimRateBips = _minClaimRateBips;
-    }
-
-    function setAutoCollectFees(bool _autoCollectFees) external onlyOwner {
-        autoCollectFees = _autoCollectFees;
+    function claimAllGasManual() external onlyOwner {
+        BLAST.claimAllGas(address(this), feeManager);
     }
 }

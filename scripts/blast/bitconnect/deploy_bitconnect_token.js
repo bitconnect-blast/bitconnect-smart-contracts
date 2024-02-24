@@ -22,8 +22,6 @@ async function main(verify) {
   // process.env.BLAST_FEE_MANAGER,
   // process.env.BITDEX_ROUTER_ADDRESS,
   // process.env.BLAST_FEE_MANAGER,
-  // process.env.MIN_CLAIM_RATE_BIPS,
-  // process.env.BLAST_GAS_FEE_TO
   //================================================================================
   //=================================================================================
   //=================================================================================
@@ -46,13 +44,10 @@ async function main(verify) {
     process.env.TOKEN_SYMBOL, 
     process.env.BLAST_FEE_MANAGER,
     process.env.BITDEX_ROUTER_ADDRESS,
-    process.env.BLAST_FEE_MANAGER,
-    process.env.MIN_CLAIM_RATE_BIPS,
-    process.env.BLAST_GAS_FEE_TO
+    process.env.BLAST_FEE_MANAGER
   );
 
   await contract.deployed();
-  console.log(`${process.env.TOKEN_NAME} deployed to: ${contract.address}`);
 
   while(!fundsTransferred){
     try{
@@ -61,7 +56,7 @@ async function main(verify) {
         contract.address, 
         hre.ethers.utils.parseEther("950000000")); //950M of 1B
       await transferTxn.wait();
-      console.log("Funds transferred: ", hre.ethers.utils.formatEther(hre.ethers.utils.parseEther("950000000")));
+      console.log("BIT Funds transferred: ", hre.ethers.utils.formatEther(hre.ethers.utils.parseEther("950000000")));
       fundsTransferred = true;
     } catch(error) {
       console.log('Funds transfer failed. Trying again...');
@@ -76,7 +71,7 @@ async function main(verify) {
         value: LP_ETH_AMOUNT
       });
       await addLiqTxn.wait();
-      console.log("Liquidity added: ", hre.ethers.utils.formatEther(LP_ETH_AMOUNT));
+      console.log("BIT Liquidity added: ", hre.ethers.utils.formatEther(LP_ETH_AMOUNT));
       LPadded = true;
     } catch(error) {
       console.log('Liquidity add failed. Trying again...');
@@ -98,9 +93,7 @@ async function main(verify) {
             process.env.TOKEN_SYMBOL, 
             process.env.BLAST_FEE_MANAGER,
             process.env.BITDEX_ROUTER_ADDRESS,
-            process.env.BLAST_FEE_MANAGER,
-            process.env.MIN_CLAIM_RATE_BIPS,
-            process.env.BLAST_GAS_FEE_TO
+            process.env.BLAST_FEE_MANAGER
           ],
         });
 
@@ -267,16 +260,9 @@ async function main(verify) {
     }
   }
 
-  return contract.address;
+  return contract;
 }
 
 module.exports = {
   main
 }
-
-// main()
-//   .then(() => process.exit(0))
-//   .catch((error) => {
-//     console.error(error);
-//     process.exitCode = 1;
-//   });

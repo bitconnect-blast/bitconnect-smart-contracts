@@ -11,22 +11,16 @@ contract BitDexFactory is IBitDexFactory {
     address public feeToSetter;
 
     //blast
-    address public gasFeeTo;
     address public feeManager;
-    uint256 public minClaimRateBips;
-    uint256 public intervalToTransferToFeeManager;
-    bool public autoCollectFees = true;
 
     mapping(address => mapping(address => address)) public getPair;
     address[] public allPairs;
 
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
-    constructor(address _feeToSetter, address _feeManager, uint256 _minClaimRateBips, uint256 _intervalToTransferToFeeManager) public {
+    constructor(address _feeToSetter, address _feeManager) public {
         feeToSetter = _feeToSetter;
         feeManager = _feeManager;
-        minClaimRateBips = _minClaimRateBips;
-        intervalToTransferToFeeManager = _intervalToTransferToFeeManager;
     }
 
     function allPairsLength() external view returns (uint) {
@@ -60,24 +54,9 @@ contract BitDexFactory is IBitDexFactory {
         feeToSetter = _feeToSetter;
     }
 
-    function setGasFeeTo(address _gasFeeTo) external {
-        require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
-        gasFeeTo = _gasFeeTo;
-    }
-
     function setFeeManager(address _feeManager) external {
         require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
         feeManager = _feeManager;
-    }
-
-    function setMinClaimRateBips(uint256 _minClaimRateBips) external {
-        require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
-        minClaimRateBips = _minClaimRateBips;
-    }
-
-    function setIntervalToTransferToFeeManager(uint256 _intervalToTransferToFeeManager) external {
-        require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
-        intervalToTransferToFeeManager = _intervalToTransferToFeeManager;
     }
 
     function claimAtBips(address _pairAddress, uint256 _bips) external returns (bool, bool) {
@@ -86,8 +65,15 @@ contract BitDexFactory is IBitDexFactory {
         return (claimWethYieldSuccess, claimGasSuccess);
     }
 
-    function setAutoCollectFees(bool _autoCollectFees) external {
+    function claimAllPairsAtBips(uint256 _bips) external returns (bool[] memory, bool[] memory) {
         require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
-        autoCollectFees = _autoCollectFees;
+        bool[] memory claimYieldResults = new bool[](allPairs.length);
+        bool[] memory claimGasResults = new bool[](allPairs.length);
+        for (uint256 i = 0; i < allPairs.length; i++) {
+            (bool claimWethYieldSuccess, bool claimGasSuccess) = BitDexPair(allPairs[i]).claimAtBips(_bips);
+            claimYieldResults[i] = claimWethYieldSuccess;
+            claimGasResults[i] = claimGasSuccess;
+        }
+        return (claimYieldResults, claimGasResults);
     }
 }
