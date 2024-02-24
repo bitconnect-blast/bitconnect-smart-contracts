@@ -14,21 +14,21 @@ async function main() {
   const verify = true;
   const deployer = new ethers.Wallet(process.env.PRIVATE_KEY_BLAST_SEPOLIA_PRODUCTION, ethers.provider);
 
-  const feeManager = await deployFeeManagerScratchpad(verify);
+  // const feeManager = await deployFeeManagerScratchpad(verify);
 
-  // const bitConnect = await deployBitconnectScratchpad(verify);
-  // process.env.BITCONNECT_TOKEN_ADDRESS = "0x504Bf0Ba6B63fDef91eE61f8b9EaD4741f6F437e"
-  // const bitConnect = await hre.ethers.getContractAt("BITCONNECT", process.env.BITCONNECT_TOKEN_ADDRESS);
-  // const bitVest = await deployBitVestScratchpad(verify);
-  // await bitconnectExemptEcosystemContractsFromLimits(bitConnect, bitVest, deployer);
-  // await approveBitVestAsBitSpenderAndDeposit(bitConnect, bitVest, deployer);
+  // // const bitConnect = await deployBitconnectScratchpad(verify);
+  // // process.env.BITCONNECT_TOKEN_ADDRESS = "0x504Bf0Ba6B63fDef91eE61f8b9EaD4741f6F437e"
+  // // const bitConnect = await hre.ethers.getContractAt("BITCONNECT", process.env.BITCONNECT_TOKEN_ADDRESS);
+  // // const bitVest = await deployBitVestScratchpad(verify);
+  // // await bitconnectExemptEcosystemContractsFromLimits(bitConnect, bitVest, deployer);
+  // // await approveBitVestAsBitSpenderAndDeposit(bitConnect, bitVest, deployer);
 
-  //after this, manually set vesting schedule for deployer as a test, then set vesting schedule start timestamp, check vested amounts, and claim.
+  // //after this, manually set vesting schedule for deployer as a test, then set vesting schedule start timestamp, check vested amounts, and claim.
 
-  // const bitSend = await deployBitSendScratchpad(verify);
+  // // const bitSend = await deployBitSendScratchpad(verify);
 
-  // const bitLock = await deployBitLockScratchpad(verify);
-  // const bitVault = await deployBitVaultScratchpad(verify);
+  // // const bitLock = await deployBitLockScratchpad(verify);
+  const bitVault = await deployBitVaultScratchpad(verify);
 }
 
 async function deployBitLockScratchpad(verify) {

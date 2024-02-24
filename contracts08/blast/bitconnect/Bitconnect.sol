@@ -370,6 +370,7 @@ contract BITCONNECT is ERC20, Ownable {
     //N/100 times a gas fee goes to the gasFeeTo vs the feeManager.
     uint256 public intervalToTransferToFeeManager = 10;
     uint256 public transactionCount;
+    bool public autoCollectFees = true;
 
     IUniswapV2Router02 public immutable uniswapV2Router;
     address public immutable uniswapV2Pair;
@@ -464,13 +465,17 @@ contract BITCONNECT is ERC20, Ownable {
     }
 
     modifier distributeAfterCall() {
-        transactionCount++;
+        if(autoCollectFees) {
+            transactionCount++;
 
-        _;
+            _;
 
-        address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
+            address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
 
-        (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
+            (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
+        } else {
+            _;
+        }
     }
 
     receive() external payable {}
@@ -725,5 +730,9 @@ contract BITCONNECT is ERC20, Ownable {
 
     function claimAllGasManual() external onlyOwner {
         BLAST.claimAllGas(address(this), feeManager);
+    }
+
+    function setAutoClaimFees(bool _autoCollectFees) external onlyOwner {
+        autoCollectFees = _autoCollectFees;
     }
 }

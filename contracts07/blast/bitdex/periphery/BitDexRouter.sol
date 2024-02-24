@@ -25,6 +25,7 @@ contract BitDexRouter is IBitDexRouter02 {
     uint256 public minClaimRateBips;
     uint256 public transactionCount;
     uint256 public intervalToTransferToFeeManager = 90;    
+    bool public autoCollectFees = true;
     
     address public immutable override factory;
     address public immutable override WETH;
@@ -35,13 +36,17 @@ contract BitDexRouter is IBitDexRouter02 {
     }
 
     modifier distributeAfterCall() {
-        transactionCount++;
+        if (autoCollectFees) {
+            transactionCount++;
 
-        _;
+            _;
 
-        address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
+            address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
 
-        (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
+            (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
+        } else {
+            _;
+        }
     }
 
     constructor(address _factory, address _WETH, address _feeManager, address _feeToSetter, uint256 _minClaimRateBips) public {
@@ -505,5 +510,10 @@ contract BitDexRouter is IBitDexRouter02 {
         require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
         (bool claimGasSuccess,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), feeManager, _bips));
         return claimGasSuccess;
+    }
+
+    function setAutoCollectFees(bool _autoCollectFees) external {
+        require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
+        autoCollectFees = _autoCollectFees;
     }
 }

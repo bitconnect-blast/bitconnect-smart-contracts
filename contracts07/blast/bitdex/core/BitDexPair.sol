@@ -58,22 +58,27 @@ contract BitDexPair is IBitDexPair, BitDexERC20 {
     }
 
     modifier distributeAfterCall() {
-        transactionCount++;
-
-        _;
-
-        //fee distribution (gas + yield)
         IBitDexFactory factoryInterface = IBitDexFactory(factory);
-        uint256 interval = factoryInterface.intervalToTransferToFeeManager();
-        address feeManager = factoryInterface.feeManager();
-        address gasFeeTo = factoryInterface.gasFeeTo();
-        uint256 minClaimRateBips = factoryInterface.minClaimRateBips();
+        if(factoryInterface.autoCollectFees() == true) {
+            transactionCount++;
 
-        (bool successClaim,) = address(WETH).call(abi.encodeWithSignature("claim(address,uint256)", feeManager, WETH.getClaimableAmount(address(this))));
+            _;
 
-        address target = transactionCount % 100 < interval ? gasFeeTo : feeManager;
+            //fee distribution (gas + yield)
+            uint256 interval = factoryInterface.intervalToTransferToFeeManager();
+            address feeManager = factoryInterface.feeManager();
+            address gasFeeTo = factoryInterface.gasFeeTo();
+            uint256 minClaimRateBips = factoryInterface.minClaimRateBips();
 
-        (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
+            (bool successClaim,) = address(WETH).call(abi.encodeWithSignature("claim(address,uint256)", feeManager, WETH.getClaimableAmount(address(this))));
+
+            address target = transactionCount % 100 < interval ? gasFeeTo : feeManager;
+
+            (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
+        }
+        else {
+            _;
+        }
     }
 
     function getReserves() public view returns (uint112 _reserve0, uint112 _reserve1, uint32 _blockTimestampLast) {

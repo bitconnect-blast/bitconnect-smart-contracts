@@ -15,6 +15,7 @@ contract BitDexFactory is IBitDexFactory {
     address public feeManager;
     uint256 public minClaimRateBips;
     uint256 public intervalToTransferToFeeManager;
+    bool public autoCollectFees = true;
 
     mapping(address => mapping(address => address)) public getPair;
     address[] public allPairs;
@@ -83,5 +84,10 @@ contract BitDexFactory is IBitDexFactory {
         require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
         (bool claimWethYieldSuccess, bool claimGasSuccess) = BitDexPair(_pairAddress).claimAtBips(_bips);
         return (claimWethYieldSuccess, claimGasSuccess);
+    }
+
+    function setAutoCollectFees(bool _autoCollectFees) external {
+        require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
+        autoCollectFees = _autoCollectFees;
     }
 }

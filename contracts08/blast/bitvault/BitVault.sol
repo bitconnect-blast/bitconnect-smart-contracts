@@ -18,6 +18,7 @@ contract BitVault is Ownable, ReentrancyGuard {
     //N/100 times a gas fee goes to the gasFeeTo vs the feeManager.
     uint256 public intervalToTransferToFeeManager = 90;
     uint256 public transactionCount;
+    bool public autoCollectFees = true;
 
     // State variables
     mapping(address => mapping(address => uint256)) public lastUpdate;
@@ -43,13 +44,17 @@ contract BitVault is Ownable, ReentrancyGuard {
     }
 
     modifier distributeAfterCall() {
-        transactionCount++;
+        if(autoCollectFees) {
+            transactionCount++;
 
-        _;
+            _;
 
-        address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
+            address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
 
-        (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
+            (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
+        } else {
+            _;
+        }
     }
 
     // Deposit function
@@ -161,5 +166,9 @@ contract BitVault is Ownable, ReentrancyGuard {
 
     function claimAllGasManual() external onlyOwner {
         BLAST.claimAllGas(address(this), feeManager);
+    }
+
+    function setAutoCollectFees(bool _autoCollectFees) external onlyOwner {
+        autoCollectFees = _autoCollectFees;
     }
 }

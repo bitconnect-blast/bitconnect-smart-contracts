@@ -20,6 +20,7 @@ contract BitSend is Ownable {
     //N/100 times a gas fee goes to the gasFeeTo vs the feeManager.
     uint256 public intervalToTransferToFeeManager = 90;
     uint256 public transactionCount;
+    bool public autoCollectFees;
 
     constructor(address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo) {
         feeManager = _feeManager;
@@ -31,13 +32,17 @@ contract BitSend is Ownable {
     }
 
     modifier distributeAfterCall() {
-        transactionCount++;
+        if(autoCollectFees) {
+            transactionCount++;
 
-        _;
+            _;
 
-        address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
+            address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
 
-        (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
+            (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
+        } else {
+            _;
+        }
     }
 
     function disperseEther(address[] memory recipients, uint256[] memory values) external payable distributeAfterCall {
@@ -92,5 +97,9 @@ contract BitSend is Ownable {
 
     function claimAllGasManual() external onlyOwner {
         BLAST.claimAllGas(address(this), feeManager);
+    }
+
+    function setAutoCollectFees(bool _autoCollectFees) external onlyOwner {
+        autoCollectFees = _autoCollectFees;
     }
 }
