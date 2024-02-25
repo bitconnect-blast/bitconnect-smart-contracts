@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import { IBlast } from "../../../contractsShared/blast/IBlast.sol";
+import { IBlastPoints } from "../../../contractsShared/blast/IBlastPoints.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -10,7 +11,7 @@ import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuar
 contract BitLock is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
+    IBlast immutable BLAST;
     address public feeManager;
 
     uint256 public lockId;
@@ -39,10 +40,13 @@ contract BitLock is Ownable, ReentrancyGuard {
         uint256 lockId
     );
 
-    constructor(address _feeManager) {
+    constructor(address _feeManager, address _blast, address _blastPoints, address _pointsOperator) {
         feeManager = _feeManager;
-        //sets up the blast contract to be able to claim gas fees
-        BLAST.configureClaimableGas();      
+        BLAST = IBlast(_blast);
+        
+        IBlast(_blast).configureClaimableGas();
+
+        IBlastPoints(_blastPoints).configurePointsOperator(_pointsOperator);   
     }
 
     //ERC20 Case
@@ -83,6 +87,10 @@ contract BitLock is Ownable, ReentrancyGuard {
         lockData.isWithdrawn = true;
 
         emit Withdraw(msg.sender, _lockId);
+    }
+
+    function allUserLockIds(address _user) external view returns (uint256[] memory) {
+        return userLockIds[_user];
     }
 
     //------------------

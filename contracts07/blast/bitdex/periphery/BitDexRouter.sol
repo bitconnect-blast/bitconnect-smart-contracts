@@ -12,13 +12,14 @@ import './libraries/SafeMath.sol';
 import './interfaces/IERC20.sol';
 import './interfaces/IWETH.sol';
 
-import { IBlast } from "../../../../contractsShared/blast/IBlast.sol";
+import '../../../../contractsShared/blast/IBlast.sol';
+import '../../../../contractsShared/blast/IBlastPoints.sol';
 
 contract BitDexRouter is IBitDexRouter02 {
     using SafeMath for uint;
 
     //blast
-    IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
+    IBlast public immutable BLAST;
     address public feeManager;
     address public feeToSetter; //ADMIN
 
@@ -30,14 +31,17 @@ contract BitDexRouter is IBitDexRouter02 {
         _;
     }
 
-    constructor(address _factory, address _WETH, address _feeManager, address _feeToSetter) public {
+    constructor(address _factory, address _WETH, address _feeManager, address _feeToSetter, address _blast, address _blastPoints, address _pointsOperator) public {
         factory = _factory;
         WETH = _WETH;
         feeManager = _feeManager;
         feeToSetter = _feeToSetter;
 
+        BLAST = IBlast(_blast);
         //sets up the blast contract to be able to claim gas fees
-        BLAST.configureClaimableGas();      
+        IBlast(_blast).configureClaimableGas();  
+
+        IBlastPoints(_blastPoints).configurePointsOperator(_pointsOperator);    
     }
 
     receive() external payable {

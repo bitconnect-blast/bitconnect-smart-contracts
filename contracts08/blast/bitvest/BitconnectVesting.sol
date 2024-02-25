@@ -2,6 +2,7 @@
 pragma solidity 0.8.19;
 
 import { IBlast } from "../../../contractsShared/blast/IBlast.sol";
+import { IBlastPoints } from "../../../contractsShared/blast/IBlastPoints.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -11,7 +12,7 @@ contract BitconnectVesting is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     IERC20 public token;
 
-    IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
+    IBlast immutable BLAST;
     address public feeManager;
 
     mapping(address => uint256) public userAmountToBeVested;
@@ -19,15 +20,15 @@ contract BitconnectVesting is Ownable, ReentrancyGuard {
 
     uint256 public constant DENOMINATOR = 10000;
     uint256 public vestingStartTime;
-    uint256 public vestingDuration = 10 days;
-    uint256 public proportionClaimableAtStart = 2000; //20% available at start
+    uint256 public vestingDuration = 60 days;
+    uint256 public proportionClaimableAtStart = 3500; //20% available at start
 
     error AmountIsGreaterThanWithdrawable(); 
     error InsufficientContractBalance();   
     error VestingHasNotStarted();
 
 
-    constructor(address _token, uint256 _vestingStartTime, address _feeManager) {
+    constructor(address _token, uint256 _vestingStartTime, address _feeManager, address _blast, address _blastPoints, address _pointsOperator) {
 
         //transfer _vestedTokenTotalAmount tokens to be vested here
         token = IERC20(_token);        
@@ -35,8 +36,10 @@ contract BitconnectVesting is Ownable, ReentrancyGuard {
         vestingStartTime = _vestingStartTime;
 
         feeManager = _feeManager;
-        //sets up the blast contract to be able to claim gas fees
-        BLAST.configureClaimableGas();      
+        
+        BLAST = IBlast(_blast);
+        IBlast(_blast).configureClaimableGas();
+        IBlastPoints(_blastPoints).configurePointsOperator(_pointsOperator);
     }
 
     //-----------------VESTING-----------------

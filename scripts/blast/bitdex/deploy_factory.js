@@ -4,9 +4,6 @@ require("dotenv").config();
 
 async function main(verify) {
 
-  const feeTo = process.env.BITDEX_FEE_TO;
-  const feeManager = process.env.BLAST_FEE_MANAGER; //(memory in-session env)
-
   const [deployer] = await hre.ethers.getSigners();
   const feeToSetter = deployer.address;//for testing
   
@@ -16,13 +13,17 @@ async function main(verify) {
   const BitDexFactory = await hre.ethers.getContractFactory("BitDexFactory");
   const bitDexFactory = await BitDexFactory.connect(deployer).deploy(
     feeToSetter,
-    feeManager
+    process.env.BLAST_FEE_MANAGER,
+    process.env.BLAST_ADDRESS,
+    process.env.BLAST_POINTS_ADDRESS,
+    process.env.WETH_ADDRESS,
+    process.env.BLAST_POINTS_OPERATOR_ADDRESS
   );
 
   await bitDexFactory.deployed();
 
   // set feeTo
-  const setFeeToTx = await bitDexFactory.connect(deployer).setFeeTo(feeTo);
+  const setFeeToTx = await bitDexFactory.connect(deployer).setFeeTo(process.env.BITDEX_FEE_TO);
   await setFeeToTx.wait();
 
   //get init commit hash
@@ -40,7 +41,11 @@ async function main(verify) {
               address: bitDexFactory.address,
               constructorArguments: [
                   deployer.address, 
-                  feeManager
+                  process.env.BLAST_FEE_MANAGER,
+                  process.env.BLAST_ADDRESS,
+                  process.env.BLAST_POINTS_ADDRESS,
+                  process.env.WETH_ADDRESS,
+                  process.env.BLAST_POINTS_OPERATOR_ADDRESS
               ],
           });
 

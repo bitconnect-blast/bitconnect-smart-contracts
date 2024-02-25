@@ -1,10 +1,10 @@
 const hre = require("hardhat");
-const deployFeeManager = require("./utils/deploy_fee_manager").main;
-const deployBitconnect = require("./bitconnect/deploy_bitconnect_token").main;
-const deployBitLock = require("./bitlock/deploy_bitlock").main;
-const deployBitVest = require("./bitvest/deploy_vesting").main;
-const deployBitVault = require("./bitvault/deploy_bitvault").main;
-const deployBitSend = require("./bitsend/deploy_bitsend").main;
+const deployFeeManager = require("../utils/deploy_fee_manager").main;
+const deployBitconnect = require("../bitconnect/deploy_bitconnect_token").main;
+const deployBitLock = require("../bitlock/deploy_bitlock").main;
+const deployBitVest = require("../bitvest/deploy_vesting").main;
+const deployBitVault = require("../bitvault/deploy_bitvault").main;
+const deployBitSend = require("../bitsend/deploy_bitsend").main;
 
 /**
  * see deploys/testing.json for existing addresses used to fill in here

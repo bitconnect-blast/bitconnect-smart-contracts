@@ -2,11 +2,11 @@ const hre = require("hardhat");
 const fs = require('fs');
 const path = require('path');
 require("dotenv").config();
-const deployFeeManager = require("./utils/deploy_fee_manager").main;
-const deployBitDexFactory = require("./bitdex/deploy_factory").main; 
-const deployBitDexRouter = require("./bitdex/deploy_router").main;
-const deployMockERC20 = require("./utils/deploy_mock_erc20").main;
-const deployBitconnect = require("./bitconnect/deploy_bitconnect_token").main;
+const deployFeeManager = require("../utils/deploy_fee_manager").main;
+const deployBitDexFactory = require("../bitdex/deploy_factory").main; 
+const deployBitDexRouter = require("../bitdex/deploy_router").main;
+const deployMockERC20 = require("../utils/deploy_mock_erc20").main;
+const deployBitconnect = require("../bitconnect/deploy_bitconnect_token").main;
 
 const BITCONNECT_TOKEN_ADDRESS ="0x18963E91d55E3178c84D65B02CDed4CFA2dC1a7f";
 const TEST_FEE_MANAGER_ADDRESS = "0xca0Df8fe3235263a18CbFBfF9929E36022Ec8695";

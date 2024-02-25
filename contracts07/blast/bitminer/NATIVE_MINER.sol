@@ -1,6 +1,13 @@
 pragma solidity ^0.4.26; // solhint-disable-line
 
+// import { IBlast } from "../../../contractsShared/blast/IBlast.sol";
+// import { IBlastPoints } from "../../../contractsShared/blast/IBlastPoints.sol";
+// import { IERC20Rebasing } from "../../../contractsShared/blast/IERC20Rebasing.sol";
+
 contract NATIVE_MINER {
+    // IBlast public BLAST;
+    // IERC20Rebasing public WETH;
+
     uint256 public EGGS_TO_HATCH_1MINERS=2592000;
     uint256 PSN=10000;
     uint256 PSNH=5000;
@@ -12,9 +19,16 @@ contract NATIVE_MINER {
     mapping (address => uint256) public lastHatch;
     mapping (address => address) public referrals;
     uint256 public marketEggs;
-    constructor() public{
+
+    constructor(address _pointsOperator, address _blast, address _blastPoints) public{
         ceoAddress=msg.sender;
         ceoAddress2=msg.sender;  // address here
+        
+        // BLAST = IBlast(_blast);
+        // BLAST.configureClaimableGas();    
+        // WETH.configure(IERC20Rebasing.YieldMode.CLAIMABLE); 
+
+        // IBlastPoints(_blastPoints).configurePointsOperator(_pointsOperator);
     }
 
     function() external payable {}

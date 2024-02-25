@@ -22,6 +22,9 @@ async function main(verify) {
   // process.env.BLAST_FEE_MANAGER,
   // process.env.BITDEX_ROUTER_ADDRESS,
   // process.env.BLAST_FEE_MANAGER,
+  // process.env.BLAST_ADDRESS,
+  // process.env.BLAST_POINTS_ADDRESS,
+  // process.env.BLAST_POINTS_OPERATOR_ADDRESS
   //================================================================================
   //=================================================================================
   //=================================================================================
@@ -37,14 +40,18 @@ async function main(verify) {
   //   address _marketingWallet,
   //   address _uniswapV2RouterAddress,
   //   address _feeManager,
-  //   uint256 _minClaimRateBips,
-  //   address _gasFeeTo
+  //   address _blast,
+  //   address _blastPoints,
+  //   address _pointsOperator
   const contract = await BitConnect.deploy(
     process.env.TOKEN_NAME, 
     process.env.TOKEN_SYMBOL, 
     process.env.BLAST_FEE_MANAGER,
     process.env.BITDEX_ROUTER_ADDRESS,
-    process.env.BLAST_FEE_MANAGER
+    process.env.BLAST_FEE_MANAGER,
+    process.env.BLAST_ADDRESS,
+    process.env.BLAST_POINTS_ADDRESS,
+    process.env.BLAST_POINTS_OPERATOR_ADDRESS
   );
 
   await contract.deployed();
@@ -54,9 +61,9 @@ async function main(verify) {
       // Transfer this ERC20 to the contract
       let transferTxn = await contract.connect(deployer).transfer(
         contract.address, 
-        hre.ethers.utils.parseEther("950000000")); //950M of 1B
+        hre.ethers.utils.parseEther("350000000")); //350M of 1B (35%)
       await transferTxn.wait();
-      console.log("BIT Funds transferred: ", hre.ethers.utils.formatEther(hre.ethers.utils.parseEther("950000000")));
+      console.log("BIT Funds transferred: ", hre.ethers.utils.formatEther(hre.ethers.utils.parseEther("350000000")));
       fundsTransferred = true;
     } catch(error) {
       console.log('Funds transfer failed. Trying again...');
@@ -93,7 +100,10 @@ async function main(verify) {
             process.env.TOKEN_SYMBOL, 
             process.env.BLAST_FEE_MANAGER,
             process.env.BITDEX_ROUTER_ADDRESS,
-            process.env.BLAST_FEE_MANAGER
+            process.env.BLAST_FEE_MANAGER,
+            process.env.BLAST_ADDRESS,
+            process.env.BLAST_POINTS_ADDRESS,
+            process.env.BLAST_POINTS_OPERATOR_ADDRESS
           ],
         });
 

@@ -15,4 +15,9 @@ interface IBitDexFactory {
     function setFeeTo(address) external;
     function setFeeToSetter(address) external;
     function feeManager() external view returns (address);
+
+    function blastAddress() external view returns (address);
+    function blastPointsAddress() external view returns (address);
+    function wethAddress() external view returns (address);
+    function pointsOperatorAddress() external view returns (address);  
 }

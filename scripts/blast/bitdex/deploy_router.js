@@ -14,7 +14,15 @@ async function main(verify) {
   // const Router = await hre.ethers.getContractFactory("UniswapV2Router02");
   // const router = await Router.connect(deployer).deploy(factoryAddress, WETH_Address);  
   const Router = await hre.ethers.getContractFactory("BitDexRouter");
-  const router = await Router.connect(deployer).deploy(factoryAddress, WETH_Address, feeManager, feeToSetter);
+  const router = await Router.connect(deployer).deploy(
+    factoryAddress, 
+    WETH_Address, 
+    feeManager, 
+    feeToSetter,
+    process.env.BLAST_ADDRESS,
+    process.env.BLAST_POINTS_ADDRESS,
+    process.env.BLAST_POINTS_OPERATOR_ADDRESS
+  );
 
   await router.deployed();
 
@@ -32,7 +40,10 @@ async function main(verify) {
                   factoryAddress, 
                   WETH_Address, 
                   feeManager,
-                  feeToSetter
+                  feeToSetter,
+                  process.env.BLAST_ADDRESS,
+                  process.env.BLAST_POINTS_ADDRESS,
+                  process.env.BLAST_POINTS_OPERATOR_ADDRESS
               ],
           });
 

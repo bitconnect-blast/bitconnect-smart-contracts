@@ -11,6 +11,10 @@ contract BitDexFactory is IBitDexFactory {
     address public feeToSetter;
 
     //blast
+    address public blastAddress;
+    address public blastPointsAddress;
+    address public wethAddress;
+    address public pointsOperatorAddress;
     address public feeManager;
 
     mapping(address => mapping(address => address)) public getPair;
@@ -18,9 +22,13 @@ contract BitDexFactory is IBitDexFactory {
 
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
-    constructor(address _feeToSetter, address _feeManager) public {
+    constructor(address _feeToSetter, address _feeManager, address _blast, address _blastPoints, address _weth, address _pointsOperator) public {
         feeToSetter = _feeToSetter;
         feeManager = _feeManager;
+        blastAddress = _blast;
+        blastPointsAddress = _blastPoints;
+        wethAddress = _weth;
+        pointsOperatorAddress = _pointsOperator;
     }
 
     function allPairsLength() external view returns (uint) {

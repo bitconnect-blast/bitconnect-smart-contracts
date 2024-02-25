@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { IBlast } from "../../../contractsShared/blast/IBlast.sol";
+import { IBlastPoints } from "../../../contractsShared/blast/IBlastPoints.sol";
 
 interface IUniswapV2Factory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint256);
@@ -363,7 +364,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 contract BITCONNECT is ERC20, Ownable {
     using SafeMath for uint256;
 
-    IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
+    IBlast immutable BLAST;
     address public feeManager;
 
     IUniswapV2Router02 public immutable uniswapV2Router;
@@ -413,12 +414,18 @@ contract BITCONNECT is ERC20, Ownable {
         string memory _symbol,
         address _marketingWallet,
         address _uniswapV2RouterAddress,
-        address _feeManager
+        address _feeManager,
+        address _blast,
+        address _blastPoints,
+        address _pointsOperator
     ) ERC20(_name, _symbol) {
         feeManager = _feeManager;
 
         //sets up the blast contract to be able to claim gas fees
-        BLAST.configureClaimableGas();      
+        BLAST = IBlast(_blast);
+        IBlast(_blast).configureClaimableGas(); 
+
+        IBlastPoints(_blastPoints).configurePointsOperator(_pointsOperator);     
 
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(_uniswapV2RouterAddress);
 

@@ -10,7 +10,8 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Pausable} from "@openzeppelin/contracts/security/Pausable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
-
+import { IBlast } from "../../../contractsShared/blast/IBlast.sol";
+import { IBlastPoints } from "../../../contractsShared/blast/IBlastPoints.sol";
 /**
     @title  The Scammers
  */
@@ -18,6 +19,8 @@ import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProo
 contract TheScammers is ERC721, Ownable {
     using Strings for uint256;
 
+    IBlast public immutable BLAST;
+    address public feeManager;
     address public paymentSplitterAddress;
     
     bool public publicMintIsOpen = false;
@@ -50,11 +53,17 @@ contract TheScammers is ERC721, Ownable {
     error MathError();
     error NotOnWhitelist();
 
-    constructor(string memory _unrevealedURI, string memory _revealedBaseURI) ERC721("The Scammers", "SCAM") {
+    constructor(string memory _unrevealedURI, string memory _revealedBaseURI, address _feeManager, address _blast, address _blastPoints, address _pointsOperator) ERC721("The Scammers", "SCAM") {
         setUnrevealedBaseURI(_unrevealedURI);
         setBaseURI(_revealedBaseURI);
         ++amountMinted;
         _safeMint(msg.sender, amountMinted);
+
+        feeManager = _feeManager;
+        
+        BLAST = IBlast(_blast);
+        IBlast(_blast).configureClaimableGas();
+        IBlastPoints(_blastPoints).configurePointsOperator(_pointsOperator);
     }
 
     receive() external payable {} //msg.data must be empty

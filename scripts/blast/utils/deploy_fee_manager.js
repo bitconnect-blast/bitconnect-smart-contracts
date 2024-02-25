@@ -6,7 +6,13 @@ async function main(verify) {
   const [deployer] = await hre.ethers.getSigners();
 
   const FeeManager = await hre.ethers.getContractFactory("FeeManager");
-  const feeManager = await FeeManager.connect(deployer).deploy();
+
+  // constructor(address _blast, address _blastPoints, address _pointsOperator)
+  const feeManager = await FeeManager.connect(deployer).deploy(
+    process.env.BLAST_ADDRESS,
+    process.env.BLAST_POINTS_ADDRESS,
+    process.env.BLAST_POINTS_OPERATOR_ADDRESS
+  );
 
   await feeManager.deployed();
 
@@ -14,7 +20,7 @@ async function main(verify) {
 
   if(verify){
     let FEEMANAGER_VERIFIED = false; //leave as true if not verifying
-
+        
     while(!FEEMANAGER_VERIFIED){
     try{
         //wait 5 seconds
@@ -23,7 +29,11 @@ async function main(verify) {
         console.log('Verifying FeeManager contract on Etherscan...');
             await hre.run('verify:verify', {
             address: feeManager.address,
-            constructorArguments: [],
+            constructorArguments: [
+              process.env.BLAST_ADDRESS,
+              process.env.BLAST_POINTS_ADDRESS,
+              process.env.BLAST_POINTS_OPERATOR_ADDRESS
+            ],
         });
 
         console.log('FeeManager contract verified on Etherscan');  

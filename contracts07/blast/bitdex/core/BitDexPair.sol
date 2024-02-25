@@ -8,30 +8,16 @@ import './interfaces/IERC20.sol';
 import './interfaces/IBitDexFactory.sol';
 import './interfaces/IBitDexCallee.sol';
 import '../../../../contractsShared/blast/IBlast.sol';
-
-interface IERC20Rebasing {
-    enum YieldMode {
-        AUTOMATIC,
-        VOID,
-        CLAIMABLE
-    }
-    // changes the yield mode of the caller and update the balance
-    // to reflect the configuration
-    function configure(YieldMode) external returns (uint256);
-    // "claimable" yield mode accounts can call this this claim their yield
-    // to another address
-    function claim(address recipient, uint256 amount) external returns (uint256);
-    // read the claimable amount for an account
-    function getClaimableAmount(address account) external view returns (uint256);
-}
+import '../../../../contractsShared/blast/IBlastPoints.sol';
+import '../../../../contractsShared/blast/IERC20Rebasing.sol';
 
 contract BitDexPair is IBitDexPair, BitDexERC20 {
     using SafeMath  for uint;
     using UQ112x112 for uint224;
 
     //blast
-    IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
-    IERC20Rebasing public constant WETH = IERC20Rebasing(0x4200000000000000000000000000000000000023);
+    IBlast public BLAST;
+    IERC20Rebasing public WETH;
 
     uint public constant MINIMUM_LIQUIDITY = 10**3;
     bytes4 private constant SELECTOR = bytes4(keccak256(bytes('transfer(address,uint256)')));
@@ -90,8 +76,14 @@ contract BitDexPair is IBitDexPair, BitDexERC20 {
         token1 = _token1;
         
         //sets up the blast contract to be able to claim gas + yield fees
+        IBitDexFactory IFactory = IBitDexFactory(factory);
+        BLAST = IBlast(IFactory.blastAddress());
+        WETH = IERC20Rebasing(IFactory.wethAddress());       
+
         BLAST.configureClaimableGas();    
         WETH.configure(IERC20Rebasing.YieldMode.CLAIMABLE); 
+
+        IBlastPoints(IFactory.blastPointsAddress()).configurePointsOperator(IFactory.pointsOperatorAddress());
     }
 
     // update reserves and, on the first call per block, price accumulators

@@ -7,14 +7,12 @@ async function main(verify) {
 
   const Locker = await hre.ethers.getContractFactory("BitLock");
 
-  console.log("Environment Variables:", process.env.BLAST_FEE_MANAGER, process.env.MIN_CLAIM_RATE_BIPS, process.env.BLAST_GAS_FEE_TO);
-
-
-  // constructor(address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo)
+  // constructor(address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo, address _blast, address _blastPoints, address _pointsOperator)
   const locker = await Locker.connect(deployer).deploy(
     process.env.BLAST_FEE_MANAGER,
-    process.env.MIN_CLAIM_RATE_BIPS,
-    process.env.BLAST_GAS_FEE_TO
+    process.env.BLAST_ADDRESS,
+    process.env.BLAST_POINTS_ADDRESS,
+    process.env.BLAST_POINTS_OPERATOR_ADDRESS
   );
 
   console.log("locker deployed...");
@@ -32,8 +30,9 @@ async function main(verify) {
               address: locker.address,
               constructorArguments: [
                 process.env.BLAST_FEE_MANAGER,
-                process.env.MIN_CLAIM_RATE_BIPS,
-                process.env.BLAST_GAS_FEE_TO
+                process.env.BLAST_ADDRESS,
+                process.env.BLAST_POINTS_ADDRESS,
+                process.env.BLAST_POINTS_OPERATOR_ADDRESS
               ],
           });
 

@@ -8,9 +8,12 @@ async function main(verify) {
 
   const Disperse = await hre.ethers.getContractFactory("BitSend");
 
-  // constructor(address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo)
+  // constructor(address _feeManager, uint256 _blast, address _blastPoints, address _pointsOperator)
   const disperse = await Disperse.connect(deployer).deploy(
-    process.env.BLAST_FEE_MANAGER
+    process.env.BLAST_FEE_MANAGER,
+    process.env.BLAST_ADDRESS,
+    process.env.BLAST_POINTS_ADDRESS,
+    process.env.BLAST_POINTS_OPERATOR_ADDRESS
   );
 
   await disperse.deployed();
@@ -27,7 +30,10 @@ async function main(verify) {
             await hre.run('verify:verify', {
             address: disperse.address,
             constructorArguments: [
-              process.env.BLAST_FEE_MANAGER
+              process.env.BLAST_FEE_MANAGER,
+              process.env.BLAST_ADDRESS,
+              process.env.BLAST_POINTS_ADDRESS,
+              process.env.BLAST_POINTS_OPERATOR_ADDRESS
             ],
         });
 

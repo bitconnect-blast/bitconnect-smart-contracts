@@ -1,16 +1,5 @@
 //SPDX-License-Identifier: MIT
 pragma solidity >=0.5.16;
-// enum YieldMode {
-//     AUTOMATIC,
-//     VOID,
-//     CLAIMABLE
-// }
-
-// enum GasMode { 
-//     VOID,
-//     CLAIMABLE 
-// }   
-
 
 interface IBlast{
     enum YieldMode {

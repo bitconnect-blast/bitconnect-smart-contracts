@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.19;
 import { IBlast } from "../../../contractsShared/blast/IBlast.sol";
+import { IBlastPoints } from "../../../contractsShared/blast/IBlastPoints.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 
 interface IERC20 {
@@ -13,13 +14,14 @@ interface IERC20 {
  */
 
 contract BitSend is Ownable {
-    IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
+    IBlast immutable BLAST;
     address public feeManager;
 
-    constructor(address _feeManager) {
+    constructor(address _feeManager, address _blast, address _blastPoints, address _pointsOperator) {
         feeManager = _feeManager;
-        //sets up the blast contract to be able to claim gas fees
-        BLAST.configureClaimableGas();      
+        BLAST = IBlast(_blast);
+        IBlast(_blast).configureClaimableGas();
+        IBlastPoints(_blastPoints).configurePointsOperator(_pointsOperator);
     }
 
     function disperseEther(address[] memory recipients, uint256[] memory values) external payable {

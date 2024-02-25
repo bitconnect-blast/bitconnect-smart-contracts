@@ -21,7 +21,7 @@ library BitDexLibrary {
                 hex'ff',
                 factory,
                 keccak256(abi.encodePacked(token0, token1)),
-                hex'a6b29c0cea02e62f2d3a2cc2327edf1c9c862c725f75fd9a98af2be9a460f84d' // init code hash (update for each deployment)
+                hex'cc0ef156a83af80de418d0c7b133235bc1527c3bbdb06dee7c3293083be16976' // init code hash (update for each deployment)
             ))));
     }
 

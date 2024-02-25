@@ -2,6 +2,7 @@
 pragma solidity ^0.8.19;
 
 import { IBlast } from "../../../contractsShared/blast/IBlast.sol";
+import { IBlastPoints } from "../../../contractsShared/blast/IBlastPoints.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
@@ -11,14 +12,8 @@ contract BitVault is Ownable, ReentrancyGuard {
     uint256 public constant ONE_DAY = 86400;
 
     //blast
-    IBlast constant BLAST = IBlast(0x4300000000000000000000000000000000000002);
+    IBlast immutable BLAST;
     address public feeManager;
-    address public gasFeeTo;
-    uint256 public minClaimRateBips;
-    //N/100 times a gas fee goes to the gasFeeTo vs the feeManager.
-    uint256 public intervalToTransferToFeeManager = 90;
-    uint256 public transactionCount;
-    bool public autoCollectFees = true;
 
     // State variables
     mapping(address => mapping(address => uint256)) public lastUpdate;
@@ -31,34 +26,18 @@ contract BitVault is Ownable, ReentrancyGuard {
     event Deposit(address indexed user, uint256 amount, address token);
     event Withdraw(address indexed user, uint256 amount, address token);
 
-    constructor(address _bitToken, address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo) {
+    constructor(address _bitToken, address _feeManager, address _blast, address _blastPoints, address _pointsOperator) {
         authorizedTokenAddress[_bitToken] = true;
         tokenMultiplerAddPerDay[_bitToken] = 3; //3%/day added to multiplier
 
         feeManager = _feeManager;
-        //sets up the blast contract to be able to claim gas fees
-        BLAST.configureClaimableGas();      
-        //sets the minimum claim rate for gas fees
-        minClaimRateBips = _minClaimRateBips;
-        gasFeeTo = _gasFeeTo;
-    }
-
-    modifier distributeAfterCall() {
-        if(autoCollectFees) {
-            transactionCount++;
-
-            _;
-
-            address target = transactionCount % 100 < intervalToTransferToFeeManager ? gasFeeTo : feeManager;
-
-            (bool success,) = address(BLAST).call(abi.encodeWithSignature("claimGasAtMinClaimRate(address,address,uint256)", address(this), target, minClaimRateBips));
-        } else {
-            _;
-        }
+        BLAST = IBlast(_blast);
+        IBlast(_blast).configureClaimableGas();
+        IBlastPoints(_blastPoints).configurePointsOperator(_pointsOperator);
     }
 
     // Deposit function
-    function deposit(address _tokenAddress, uint256 _amount) external nonReentrant distributeAfterCall {
+    function deposit(address _tokenAddress, uint256 _amount) external nonReentrant {
         require(_amount > 0, "Amount must be greater than 0");
         require(authorizedTokenAddress[_tokenAddress], "Token not authorized");
         
@@ -77,7 +56,7 @@ contract BitVault is Ownable, ReentrancyGuard {
     }
 
     // Withdraw function
-    function withdraw(address _tokenAddress, uint256 _amount) external nonReentrant distributeAfterCall {
+    function withdraw(address _tokenAddress, uint256 _amount) external nonReentrant {
         require(_amount > 0, "Amount must be greater than 0");
         require(userBalances[_tokenAddress][msg.sender] >= _amount, "Insufficient balance");
         

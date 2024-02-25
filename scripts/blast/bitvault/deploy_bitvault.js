@@ -7,12 +7,13 @@ async function main(verify) {
 
   const BitVault = await hre.ethers.getContractFactory("BitVault");
 
-  //  constructor(address _bitToken, address _feeManager, uint256 _minClaimRateBips, address _gasFeeTo)
+  //  constructor(address _bitToken, address _feeManager, uint256 _blast, address _blastPoints, address _pointsOperator)
   const bitVault = await BitVault.connect(deployer).deploy(
     process.env.BITCONNECT_TOKEN_ADDRESS,
     process.env.BLAST_FEE_MANAGER,
-    process.env.MIN_CLAIM_RATE_BIPS,
-    process.env.BLAST_GAS_FEE_TO
+    process.env.BLAST_ADDRESS,
+    process.env.BLAST_POINTS_ADDRESS,
+    process.env.BLAST_POINTS_OPERATOR_ADDRESS
   );
 
   await bitVault.deployed();
@@ -33,8 +34,9 @@ async function main(verify) {
             constructorArguments: [
                 process.env.BITCONNECT_TOKEN_ADDRESS,
                 process.env.BLAST_FEE_MANAGER,
-                process.env.MIN_CLAIM_RATE_BIPS,
-                process.env.BLAST_GAS_FEE_TO
+                process.env.BLAST_ADDRESS,
+                process.env.BLAST_POINTS_ADDRESS,
+                process.env.BLAST_POINTS_OPERATOR_ADDRESS
             ],
         });
 
