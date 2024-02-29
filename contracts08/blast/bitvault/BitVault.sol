@@ -4,10 +4,14 @@ pragma solidity ^0.8.19;
 import { IBlast } from "../../../contractsShared/blast/IBlast.sol";
 import { IBlastPoints } from "../../../contractsShared/blast/IBlastPoints.sol";
 import { IERC20 } from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import { SafeERC20 } from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import { Ownable } from "@openzeppelin/contracts/access/Ownable.sol";
 import { ReentrancyGuard } from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
+
 contract BitVault is Ownable, ReentrancyGuard {
+    using SafeERC20 for IERC20;
+
     uint256 public constant BASE = 100;
     uint256 public constant ONE_DAY = 86400;
 
@@ -50,7 +54,7 @@ contract BitVault is Ownable, ReentrancyGuard {
         
         userBalances[_tokenAddress][msg.sender] += _amount;
 
-        IERC20(_tokenAddress).transferFrom(msg.sender, address(this), _amount);
+        IERC20(_tokenAddress).safeTransferFrom(msg.sender, address(this), _amount);
 
         emit Deposit(msg.sender, _amount, _tokenAddress);
     }
@@ -65,7 +69,7 @@ contract BitVault is Ownable, ReentrancyGuard {
         lastUpdate[_tokenAddress][msg.sender] = block.timestamp;
         userBalances[_tokenAddress][msg.sender] -= _amount;
 
-        IERC20(_tokenAddress).transfer(msg.sender, _amount);
+        IERC20(_tokenAddress).safeTransfer(msg.sender, _amount);
 
         emit Withdraw(msg.sender, _amount, _tokenAddress);
     }
