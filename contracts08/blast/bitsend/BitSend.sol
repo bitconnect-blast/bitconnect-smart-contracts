@@ -17,6 +17,7 @@ contract BitSend is Ownable {
     IBlast immutable BLAST;
     address public feeManager;
     bool private locked;
+    uint256 private maxArrayLength = 500;
 
     constructor(address _feeManager, address _blast, address _blastPoints, address _pointsOperator) {
         feeManager = _feeManager;
@@ -25,7 +26,14 @@ contract BitSend is Ownable {
         IBlastPoints(_blastPoints).configurePointsOperator(_pointsOperator);
     }
 
-    function disperseEther(address[] memory recipients, uint256[] memory values) external payable {
+    modifier arrayChecks(address[] memory recipients, uint256[] memory values) {
+        require(recipients.length == values.length, "Array length mismatch");
+        require(recipients.length > 0, "Empty array");
+        require(recipients.length <= maxArrayLength, "Array too large");
+        _;
+    }
+
+    function disperseEther(address[] memory recipients, uint256[] memory values) external payable arrayChecks(recipients, values) {
         require(!locked, "Reentrant call detected");
         locked = true;
 
@@ -44,7 +52,7 @@ contract BitSend is Ownable {
         locked = false;
     }
 
-    function disperseToken(IERC20 token, address[] memory recipients, uint256[] memory values) external {
+    function disperseToken(IERC20 token, address[] memory recipients, uint256[] memory values) external arrayChecks(recipients, values) {
         uint256 total = 0;
         for (uint256 i = 0; i < recipients.length; i++) {
             total += values[i];
@@ -57,6 +65,10 @@ contract BitSend is Ownable {
 
     function setFeeManager(address _feeManager) external onlyOwner {
         feeManager = _feeManager;
+    }
+
+    function setMaxArrayLength(uint256 _maxArrayLength) external onlyOwner {
+        maxArrayLength = _maxArrayLength;
     }
 
     function claimGasAtMinClaimRateManual(uint256 _bips) external onlyOwner {
