@@ -18,3 +18,7 @@ BitSend Address:  0x86A0a6187E82a3F42DF3f913c8c87434C18eda05
 BitVault Address:  0xDFE94e37190BF76224ebbB0f994Eee1A2754183a
 BitLock Address:  0x53A7d194A09a811Ec096B1C887C90a91f2180FFD
 INIT_CODE_HASH: cc0ef156a83af80de418d0c7b133235bc1527c3bbdb06dee7c3293083be16976
+
+>> FEB 28 BitVault test after audit changes: 0x468C1Ac0a6ecA4d0D20089646723fd5E1aA44FB2 --> this did not work, abandon this idea
+
+>> W/ safeTransfer 0xCf0e5ef4727d0664e5F01389f08963F72Ae26ddc

@@ -23,6 +23,12 @@ contract BitDexFactory is IBitDexFactory {
     event PairCreated(address indexed token0, address indexed token1, address pair, uint);
 
     constructor(address _feeToSetter, address _feeManager, address _blast, address _blastPoints, address _weth, address _pointsOperator) public {
+        require(_feeToSetter != address(0), 'BitDex: INVALID_FEE_TO_SETTER');
+        require(_feeManager != address(0), 'BitDex: INVALID_FEE_MANAGER');
+        require(_blast != address(0), 'BitDex: INVALID_BLAST');
+        require(_blastPoints != address(0), 'BitDex: INVALID_BLAST_POINTS');
+        require(_weth != address(0), 'BitDex: INVALID_WETH');
+        require(_pointsOperator != address(0), 'BitDex: INVALID_POINTS_OPERATOR');
         feeToSetter = _feeToSetter;
         feeManager = _feeManager;
         blastAddress = _blast;
@@ -54,16 +60,19 @@ contract BitDexFactory is IBitDexFactory {
 
     function setFeeTo(address _feeTo) external {
         require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
+        require(_feeTo != address(0), 'BitDex: INVALID_FEE_TO');
         feeTo = _feeTo;
     }
 
     function setFeeToSetter(address _feeToSetter) external {
         require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
+        require(_feeToSetter != address(0), 'BitDex: INVALID_FEE_TO_SETTER');
         feeToSetter = _feeToSetter;
     }
 
     function setFeeManager(address _feeManager) external {
         require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
+        require(_feeManager != address(0), 'BitDex: INVALID_FEE_MANAGER');
         feeManager = _feeManager;
     }
 

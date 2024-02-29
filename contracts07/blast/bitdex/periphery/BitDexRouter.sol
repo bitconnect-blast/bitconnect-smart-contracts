@@ -32,6 +32,14 @@ contract BitDexRouter is IBitDexRouter02 {
     }
 
     constructor(address _factory, address _WETH, address _feeManager, address _feeToSetter, address _blast, address _blastPoints, address _pointsOperator) public {
+        require(_factory != address(0), 'BitDexRouter: ZERO_ADDRESS');
+        require(_WETH != address(0), 'BitDexRouter: ZERO_ADDRESS');
+        require(_feeManager != address(0), 'BitDexRouter: ZERO_ADDRESS');
+        require(_feeToSetter != address(0), 'BitDexRouter: ZERO_ADDRESS');
+        require(_blast != address(0), 'BitDexRouter: ZERO_ADDRESS');
+        require(_blastPoints != address(0), 'BitDexRouter: ZERO_ADDRESS');
+        require(_pointsOperator != address(0), 'BitDexRouter: ZERO_ADDRESS');
+
         factory = _factory;
         WETH = _WETH;
         feeManager = _feeManager;
@@ -467,11 +475,13 @@ contract BitDexRouter is IBitDexRouter02 {
 
     function setFeeManager(address _feeManager) external {
         require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
+        require(_feeManager != address(0), 'BitDex: INVALID_FEE_MANAGER');
         feeManager = _feeManager;
     }
 
     function setFeeToSetter(address _feeToSetter) external {
         require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
+        require(_feeToSetter != address(0), 'BitDex: INVALID_FEE_TO_SETTER');
         feeToSetter = _feeToSetter;
     }
 

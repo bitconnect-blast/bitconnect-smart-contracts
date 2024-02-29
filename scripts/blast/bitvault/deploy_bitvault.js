@@ -7,6 +7,18 @@ async function main(verify) {
 
   const BitVault = await hre.ethers.getContractFactory("BitVault");
 
+  console.log("ENV VARS IN DEPLOY BITVAULT:");
+  console.log("BITCONNECT_TOKEN_ADDRESS");
+  console.log(process.env.BITCONNECT_TOKEN_ADDRESS);
+  console.log("BLAST_FEE_MANAGER");
+  console.log(process.env.BLAST_FEE_MANAGER);
+  console.log("BLAST_ADDRESS");
+  console.log(process.env.BLAST_ADDRESS);
+  console.log("BLAST_POINTS_ADDRESS");
+  console.log(process.env.BLAST_POINTS_ADDRESS);
+  console.log("BLAST_POINTS_OPERATOR_ADDRESS");
+  console.log(process.env.BLAST_POINTS_OPERATOR_ADDRESS);
+
   //  constructor(address _bitToken, address _feeManager, uint256 _blast, address _blastPoints, address _pointsOperator)
   const bitVault = await BitVault.connect(deployer).deploy(
     process.env.BITCONNECT_TOKEN_ADDRESS,

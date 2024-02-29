@@ -126,7 +126,7 @@ contract BitVault is Ownable, ReentrancyGuard {
     function setFeeManager(address _feeManager) external onlyOwner {
         feeManager = _feeManager;
     }
-
+    
     function claimGasAtMinClaimRateManual(uint256 _bips) external onlyOwner {
         BLAST.claimGasAtMinClaimRate(address(this), feeManager, _bips);
     }

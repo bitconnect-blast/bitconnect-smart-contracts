@@ -94,9 +94,9 @@ async function main() {
 
         // const bitSend = await deployBitSend(VERIFY);
         // process.env.BITSEND_ADDRESS = bitSend.address;
-
-        // const bitVault = await deployBitVault(VERIFY);
-        // process.env.BITVAULT_ADDRESS = bitVault.address;
+        process.env.BITCONNECT_TOKEN_ADDRESS = "0xa405D39f238cC01922AbFded7f35AC5746Def2DA";
+        const bitVault = await deployBitVault(VERIFY);
+        process.env.BITVAULT_ADDRESS = bitVault.address;
 
         // //authorize bitconnect (and blastoise) token addresses
         // const authorizeBit = await bitVault.connect(deployer).addNewAuthorizedTokenAndMultiplier(bitconnect.address, 3);
@@ -105,10 +105,10 @@ async function main() {
         // // const authorizeBlastoise = await bitVault.connect(deployer).addNewAuthorizedTokenAndMultiplier(blastoiseAddress, 1);
         // // console.log("BLASTOISE authorized on BitVault with 1%/day multiplier...")
 
-        const bitLock = await deployBitLock(VERIFY);
-        process.env.BITLOCK_ADDRESS = bitLock.address;
+        // const bitLock = await deployBitLock(VERIFY);
+        // process.env.BITLOCK_ADDRESS = bitLock.address;
 
-        if(hre.network.name != "hardhat") writeEnvToJson(deployer);
+        // if(hre.network.name != "hardhat") writeEnvToJson(deployer);
 
         console.log("DEPLOY ADDRESSES: ");
         // console.log("FeeManager Address: ", process.env.BLAST_FEE_MANAGER);
