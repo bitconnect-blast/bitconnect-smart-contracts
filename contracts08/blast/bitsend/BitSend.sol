@@ -16,6 +16,7 @@ interface IERC20 {
 contract BitSend is Ownable {
     IBlast immutable BLAST;
     address public feeManager;
+    bool private locked;
 
     constructor(address _feeManager, address _blast, address _blastPoints, address _pointsOperator) {
         feeManager = _feeManager;
@@ -25,6 +26,9 @@ contract BitSend is Ownable {
     }
 
     function disperseEther(address[] memory recipients, uint256[] memory values) external payable {
+        require(!locked, "Reentrant call detected");
+        locked = true;
+
         for (uint256 i = 0; i < recipients.length; i++) {
             address payable recipient = payable(recipients[i]);
             (bool success, ) = recipient.call{value: values[i]}("");
@@ -37,6 +41,7 @@ contract BitSend is Ownable {
             require(success, "Refund transfer failed");
         }
 
+        locked = false;
     }
 
     function disperseToken(IERC20 token, address[] memory recipients, uint256[] memory values) external {
