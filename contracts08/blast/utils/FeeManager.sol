@@ -13,6 +13,7 @@ contract FeeManager is Ownable {
     IBlast immutable BLAST;
 
     uint256 private constant BPS_DENOMINATOR = 10000;
+    uint256 public maxFeeOutputs = 20;
     
     address public bitSend;
     address[] private feeOutputs;
@@ -43,8 +44,14 @@ contract FeeManager is Ownable {
 
     function setFeeOutputs(address[] memory _outputs, uint256[] memory _bps) external onlyOwner {
         require(_outputs.length == _bps.length, "FeeManager: Invalid input");
+        require(_outputs.length > 0, "FeeManager: Invalid input");
+        require(_outputs.length < maxFeeOutputs, "FeeManager: Too many outputs");
         feeOutputs = _outputs;
         feeBps = _bps;
+    }
+
+    function setMaxFeeOutputs(uint256 _maxFeeOutputs) external onlyOwner {
+        maxFeeOutputs = _maxFeeOutputs;
     }
     
     function setBitSendAddress(address _bitsend) external onlyOwner {
