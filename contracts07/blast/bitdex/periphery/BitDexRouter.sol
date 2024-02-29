@@ -26,6 +26,9 @@ contract BitDexRouter is IBitDexRouter02 {
     address public immutable override factory;
     address public immutable override WETH;
 
+    event SetFeeManager(address indexed feeManager);
+    event SetFeeToSetter(address indexed feeToSetter);
+
     modifier ensure(uint deadline) {
         require(deadline >= block.timestamp, 'BitDexRouter: EXPIRED');
         _;
@@ -477,12 +480,14 @@ contract BitDexRouter is IBitDexRouter02 {
         require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
         require(_feeManager != address(0), 'BitDex: INVALID_FEE_MANAGER');
         feeManager = _feeManager;
+        emit SetFeeManager(_feeManager);
     }
 
     function setFeeToSetter(address _feeToSetter) external {
         require(msg.sender == feeToSetter || msg.sender == feeManager, 'BitDex: FORBIDDEN');
         require(_feeToSetter != address(0), 'BitDex: INVALID_FEE_TO_SETTER');
         feeToSetter = _feeToSetter;
+        emit SetFeeToSetter(_feeToSetter);
     }
 
     function claimGasAtMinClaimRateManual(uint256 _bips) external {
