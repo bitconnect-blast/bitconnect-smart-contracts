@@ -10,7 +10,7 @@ require("hardhat-contract-sizer");
  */
 
 const useContracts07 = process.env.USE_CONTRACTS_07 === "true";
-
+const RUNS = 999999;
 module.exports = {
   paths: {
     sources: useContracts07 ? "./contracts07" : "./contracts08",
@@ -23,7 +23,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: RUNS,
           },
         },
       },
@@ -32,7 +32,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: RUNS,
           },
         },
       },
@@ -41,7 +41,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: RUNS,
           },
         },
       },
@@ -50,7 +50,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: RUNS,
           },
         },
       },
@@ -59,7 +59,7 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: RUNS,
           },
         },
       },
@@ -69,12 +69,17 @@ module.exports = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: RUNS,
           },
         },
       },
     ],
   },
+  // contractSizer: {
+  //   alphaSort: true,
+  //   runOnCompile: true,
+  //   disambiguatePaths: false,
+  // },
   defaultNetwork: "hardhat",
   networks: {
     goerli: {
@@ -134,24 +139,42 @@ module.exports = {
       forking: {
         enabled: true,
         url: 'https://sepolia.blast.io',
-        blockNumber: 2062444,      
+        blockNumber: 2440500,      
         accounts: [process.env.PRIVATE_KEY_BLAST_SEPOLIA_PRODUCTION]
       },
 
 
+
     }
   },
+  // etherscan: {
+  //   apiKey: {
+  //     blast_sepolia: "blast_sepolia", // apiKey is not required, just set a placeholder
+  //   },
+  //   customChains: [
+  //     {
+  //       network: "blast_sepolia",
+  //       chainId: 168587773,
+  //       urls: {
+  //         apiURL: "https://api.routescan.io/v2/network/testnet/evm/168587773/etherscan",
+  //         browserURL: "https://testnet.blastscan.io"
+  //       }
+  //     }
+  //   ]
+  // },
   etherscan: {
     apiKey: {
-      blast_sepolia: "blast_sepolia", // apiKey is not required, just set a placeholder
+      blast_sepolia: process.env.SCAN_API_KEY,
     },
     customChains: [
       {
         network: "blast_sepolia",
         chainId: 168587773,
         urls: {
-          apiURL: "https://api.routescan.io/v2/network/testnet/evm/168587773/etherscan",
-          browserURL: "https://testnet.blastscan.io"
+          // apiURL: "https://api.routescan.io/v2/network/testnet/evm/168587773/etherscan",
+          apiURL: "https://api-sepolia.blastscan.io/api",
+          
+          browserURL: "https://blastscan.io"
         }
       }
     ]

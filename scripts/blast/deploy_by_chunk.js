@@ -19,7 +19,10 @@ const deployBitLock = require("./bitlock/deploy_bitlock.js").main;
 
 //CHECK BEFORE EACH RUN!
 // compile with both settings just at beginning
-const chunk = 3;
+        //==================================================================
+        // HECKIN CHECK!!!!!!!!!!!!!!
+        //==================================================================
+const chunk = 1;
 const VERIFY = true;
 
 async function main() {
@@ -42,7 +45,9 @@ async function main() {
         console.log("FeeManager Address: ", process.env.BLAST_FEE_MANAGER);
     }
     if(chunk==2){
-        //set based on above output
+        //==================================================================
+        // SET BASED ON ABOVE OUTPUTS!
+        //==================================================================
         process.env.BLAST_FEE_MANAGER = "0x2D60Ff307D18b5dE15E84980DCC10aEb5E6de300";
 
         if(process.env.USE_CONTRACTS_07=="false"){
@@ -69,8 +74,11 @@ async function main() {
         console.log("INIT_CODE_HASH: ", process.env.BITDEX_INIT_CODE_HASH);
 
     }
+
     if(chunk==3){
-        //set based on above outputs
+        //==================================================================
+        // SET BASED ON ABOVE OUTPUTS!
+        //==================================================================
         process.env.BLAST_FEE_MANAGER = "0x2D60Ff307D18b5dE15E84980DCC10aEb5E6de300";
         process.env.BITDEX_FACTORY_ADDRESS = "0x47aB04f788d7835b593D8BB9144C7368Bd5b557e";
         process.env.BITDEX_INIT_CODE_HASH = "cc0ef156a83af80de418d0c7b133235bc1527c3bbdb06dee7c3293083be16976"
@@ -87,38 +95,61 @@ async function main() {
         // process.env.BITCONNECT_TOKEN_ADDRESS = bitconnect.address;
         // console.log("post bit deploy")
 
-        // //set vesting start time to 1 minute from now
-        // process.env.VESTING_START_TIME = Math.floor(new Date().getTime() / 1000) + 240;
-        // const bitVest = await deployBitVest(bitconnect, presaleAddresses, presaleAmounts, VERIFY);
-        // process.env.BITVEST_ADDRESS = bitVest.address;
+        //==================================================================
+        // AVI DEPLOYS TOKEN OPTION
+        //==================================================================
+        process.env.BITCONNECT_TOKEN_ADDRESS = "ADDRESSGOESHERE";
 
-        // const bitSend = await deployBitSend(VERIFY);
-        // process.env.BITSEND_ADDRESS = bitSend.address;
-        process.env.BITCONNECT_TOKEN_ADDRESS = "0xa405D39f238cC01922AbFded7f35AC5746Def2DA";
+        //set vesting start time to 1 minute from now
+        process.env.VESTING_START_TIME = Math.floor(new Date().getTime() / 1000) + 240;
+        const bitVest = await deployBitVest(bitconnect, presaleAddresses, presaleAmounts, VERIFY);
+        process.env.BITVEST_ADDRESS = bitVest.address;
+
+        const bitSend = await deployBitSend(VERIFY);
+        process.env.BITSEND_ADDRESS = bitSend.address;
+        
         const bitVault = await deployBitVault(VERIFY);
         process.env.BITVAULT_ADDRESS = bitVault.address;
 
-        // //authorize bitconnect (and blastoise) token addresses
-        // const authorizeBit = await bitVault.connect(deployer).addNewAuthorizedTokenAndMultiplier(bitconnect.address, 3);
-        // await authorizeBit.wait();
-        // console.log("$BIT authorized on BitVault with 3%/day multiplier...")
-        // // const authorizeBlastoise = await bitVault.connect(deployer).addNewAuthorizedTokenAndMultiplier(blastoiseAddress, 1);
-        // // console.log("BLASTOISE authorized on BitVault with 1%/day multiplier...")
+        //authorize bitconnect (and blastoise) token addresses
+        const authorizeBit = await bitVault.connect(deployer).addNewAuthorizedTokenAndMultiplier(bitconnect.address, 5);
+        await authorizeBit.wait();
+        console.log("$BIT authorized on BitVault with 5%/day multiplier...")
+        // const authorizeBlastoise = await bitVault.connect(deployer).addNewAuthorizedTokenAndMultiplier(blastoiseAddress, 2);
+        // console.log("BLASTOISE authorized on BitVault with 2%/day multiplier...")
 
-        // const bitLock = await deployBitLock(VERIFY);
-        // process.env.BITLOCK_ADDRESS = bitLock.address;
+        const bitLock = await deployBitLock(VERIFY);
+        process.env.BITLOCK_ADDRESS = bitLock.address;
 
-        // if(hre.network.name != "hardhat") writeEnvToJson(deployer);
+        //exempt bitvest, bitsend, bitvault, bitlock, from limits
+        const exemptVestFromFees = await bitconnect.connect(deployer).excludeFromFees(bitVest.address, true);
+        await exemptVestFromFees.wait();
+        const exemptVestFromLimits = await bitconnect.connect(deployer).excludeFromLimits(bitVest.address, true);
+        await exemptVestFromLimits.wait();
+        const exemptSendFromFees = await bitconnect.connect(deployer).excludeFromFees(bitSend.address, true);
+        await exemptSendFromFees.wait();
+        const exemptSendFromLimits = await bitconnect.connect(deployer).excludeFromLimits(bitSend.address, true);
+        await exemptSendFromLimits.wait();
+        const exemptVaultFromFees = await bitconnect.connect(deployer).excludeFromFees(bitVault.address, true);
+        await exemptVaultFromFees.wait();
+        const exemptVaultFromLimits = await bitconnect.connect(deployer).excludeFromLimits(bitVault.address, true);
+        await exemptVaultFromLimits.wait();
+        const exemptLockFromFees = await bitconnect.connect(deployer).excludeFromFees(bitLock.address, true);
+        await exemptLockFromFees.wait();
+        const exemptLockFromLimits = await bitconnect.connect(deployer).excludeFromLimits(bitLock.address, true);
+        await exemptLockFromLimits.wait();
+
+        if(hre.network.name != "hardhat") writeEnvToJson(deployer);
 
         console.log("DEPLOY ADDRESSES: ");
-        // console.log("FeeManager Address: ", process.env.BLAST_FEE_MANAGER);
-        // console.log("BitDexFactory Address: ", process.env.BITDEX_FACTORY_ADDRESS);
-        // console.log("BitDexRouter Address: ", process.env.BITDEX_ROUTER_ADDRESS);
-        // console.log("Multicall Address: ", process.env.MULTICALL_ADDRESS);
-        // console.log("BitConnect Address: ", process.env.BITCONNECT_TOKEN_ADDRESS);
-        // console.log("BitVest Address: ", process.env.BITVEST_ADDRESS);
-        // console.log("BitSend Address: ", process.env.BITSEND_ADDRESS);    
-        // console.log("BitVault Address: ", process.env.BITVAULT_ADDRESS);    
+        console.log("FeeManager Address: ", process.env.BLAST_FEE_MANAGER);
+        console.log("BitDexFactory Address: ", process.env.BITDEX_FACTORY_ADDRESS);
+        console.log("BitDexRouter Address: ", process.env.BITDEX_ROUTER_ADDRESS);
+        console.log("Multicall Address: ", process.env.MULTICALL_ADDRESS);
+        console.log("BitConnect Address: ", process.env.BITCONNECT_TOKEN_ADDRESS);
+        console.log("BitVest Address: ", process.env.BITVEST_ADDRESS);
+        console.log("BitSend Address: ", process.env.BITSEND_ADDRESS);    
+        console.log("BitVault Address: ", process.env.BITVAULT_ADDRESS);    
         console.log("BitLock Address: ", process.env.BITLOCK_ADDRESS);
     
     }

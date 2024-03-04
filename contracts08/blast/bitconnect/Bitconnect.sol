@@ -578,7 +578,7 @@ contract BITCONNECT is ERC20, Ownable {
         }
 
         if (limitsInEffect) {
-            if (from != owner() && to != owner() && to != address(0) && to != address(0xdead) && !swapping) {
+            if (from != owner() && to != owner() && to != address(0) && to != address(0xdead) && !swapping && !_isExcludedMaxTransactionAmount[from] && !_isExcludedMaxTransactionAmount[to]) {
                 if (!tradingActive) {
                     require(_isExcludedFromFees[from] || _isExcludedFromFees[to], "Trading is not active.");
                 }
