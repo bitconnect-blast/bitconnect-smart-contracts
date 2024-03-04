@@ -445,8 +445,8 @@ contract BITCONNECT is ERC20, Ownable {
 
         marketingWallet = _marketingWallet;
 
-        buyTotalFees = 20;
-        sellTotalFees = 20;
+        buyTotalFees = 35;
+        sellTotalFees = 35;
 
         excludeFromFees(owner(), true);
         excludeFromFees(marketingWallet, true);
